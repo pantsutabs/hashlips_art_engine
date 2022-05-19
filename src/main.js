@@ -22,6 +22,9 @@ const {
 	solanaMetadata,
 	gif,
 } = require(`${basePath}/src/config.js`);
+const {
+	generateCustomBackground,
+} = require(`${basePath}/src/customBackground.js`);
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = format.smoothing;
@@ -456,8 +459,11 @@ const startCreating = async () => {
 							gif.delay
 						);
 						hashlipsGiffer.start();
-					}
-					if (background.generate) {
+          }
+          if(background.useCustomBackground) {
+            generateCustomBackground(ctx);
+          }
+					else if (background.generate) {
 						drawBackground();
 					}
 					renderObjectArray.forEach((renderObject, index) => {

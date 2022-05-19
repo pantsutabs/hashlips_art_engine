@@ -24,15 +24,19 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 5,
+    growEditionSizeTo: 21,
     layersOrder: [
-      { name: "Background" },
-      { name: "Eyeball" },
-      { name: "Eye color" },
-      { name: "Iris" },
-      { name: "Shine" },
-      { name: "Bottom lid" },
-      { name: "Top lid" },
+      //{ name: "Background" },
+      { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
+      { name: "Hand_accessory", options: { displayName: "Hand accessory" } },
+      { name: "Body" },
+      { name: "Legs" },
+      { name: "Bottom" },
+      { name: "Top" },
+      { name: "Facial_feature", options: { displayName: "Facial feature" } },
+      { name: "Mouth" },
+      { name: "Eyes" },
+      { name: "Hair", options: { fitWith:"Hair_back", } }, // Hair_back will try to be matched with an element by the same name as the selected element in Hair
     ],
   },
 ];
@@ -42,8 +46,8 @@ const shuffleLayerConfigurations = false;
 const debugLogs = false;
 
 const format = {
-  width: 512,
-  height: 512,
+  width: 2556,
+  height: 3072,
   smoothing: false,
 };
 
@@ -73,6 +77,7 @@ const pixelFormat = {
 
 const background = {
   generate: true,
+  useCustomBackground: true,
   brightness: "80%",
   static: false,
   default: "#000000",
