@@ -1,4 +1,5 @@
 const basePath = process.cwd();
+const help = require(`${basePath}/src/help.js`);
 const { NETWORK } = require(`${basePath}/constants/network.js`);
 const fs = require("fs");
 const sha1 = require(`${basePath}/node_modules/sha1`);
@@ -10,7 +11,8 @@ const {
 	baseUri,
 	description,
 	background,
-	uniqueDnaTorrance,
+  uniqueDnaTorrance,
+  passiveTraits,
 	layerConfigurations,
 	rarityDelimiter,
 	shuffleLayerConfigurations,
@@ -25,6 +27,9 @@ const {
 const {
 	generateCustomBackground,
 } = require(`${basePath}/src/customBackground.js`);
+const {
+  generatePassiveTraits,
+} = require(`${basePath}/src/passiveTraits.js`);
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = format.smoothing;
@@ -35,10 +40,6 @@ const DNA_DELIMITER = "-";
 const HashlipsGiffer = require(`${basePath}/modules/HashlipsGiffer.js`);
 
 let hashlipsGiffer = null;
-
-const log = (obj) => {
-	console.log(JSON.stringify(obj, null, 2));
-};
 
 const buildSetup = () => {
 	if (fs.existsSync(buildDir)) {
@@ -295,22 +296,6 @@ const isDnaUnique = (_DnaList = new Set(), _dna = "") => {
 	return !_DnaList.has(_filteredDNA);
 };
 
-const pickElementFromWeightedLayer = function (layer) {
-	let totalWeight = 0;
-	layer.elements.forEach((element) => {
-		totalWeight += element.weight;
-	});
-	// number between 0 - totalWeight
-	let random = Math.floor(Math.random() * totalWeight);
-	for (var i = 0; i < layer.elements.length; i++) {
-		// subtract the current weight from the random weight until we reach a sub zero value.
-		random -= layer.elements[i].weight;
-		if (random < 0) {
-			return layer.elements[i];
-		}
-	}
-};
-
 const getNamedElement = (_layer, _name) => {
 	for(let i=0; i<_layer.elements.length; i++) {
 		let element = _layer.elements[i];
@@ -334,7 +319,7 @@ const createDna = (_layers) => {
 	// Go over every layer and pick a random element
 	for(let i=0; i<_layers.length; i++) {
 		let layer = _layers[i];
-		let element = pickElementFromWeightedLayer(layer);
+		let element = help.pickElementFromWeightedLayer(layer);
 
 		// if ignore is flagged pick the none element, every folder should have a transparent none element
 		if(layer.ignore) {
@@ -483,7 +468,10 @@ const startCreating = async () => {
 						? console.log("Editions left to create: ", abstractedIndexes)
 						: null;
 					saveImage(abstractedIndexes[0]);
-					addMetadata(newDna, abstractedIndexes[0]);
+          addMetadata(newDna, abstractedIndexes[0]);
+          help.clearIgnoredTraits(layers, metadataList[metadataList.length-1]);
+          passiveTraits ? generatePassiveTraits(metadataList[metadataList.length-1]) : null; 
+          // saves the last metadata piece to a file
 					saveMetaDataSingleFile(abstractedIndexes[0]);
 					console.log(
 						`Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(

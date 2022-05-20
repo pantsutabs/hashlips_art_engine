@@ -36,7 +36,7 @@ const layerConfigurations = [
       { name: "Facial_feature", options: { displayName: "Facial feature" } },
       { name: "Mouth" },
       { name: "Eyes" },
-      { name: "Hair", options: { fitWith:"Hair_back", } }, // Hair_back will try to be matched with an element by the same name as the selected element in Hair
+      { name: "Hair", options: { fitWith:"Hair_back", } }, // [Hair_back] will try to be matched with an element by the same name as the selected element in [Hair]
     ],
   },
 ];
@@ -89,6 +89,8 @@ const rarityDelimiter = "#";
 
 const uniqueDnaTorrance = 10000;
 
+const passiveTraits = true;
+
 const preview = {
   thumbPerRow: 5,
   thumbWidth: 50,
@@ -111,6 +113,7 @@ module.exports = {
   description,
   background,
   uniqueDnaTorrance,
+  passiveTraits,
   layerConfigurations,
   rarityDelimiter,
   preview,
