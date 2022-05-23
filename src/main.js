@@ -11,8 +11,8 @@ const {
 	baseUri,
 	description,
 	background,
-  uniqueDnaTorrance,
-  passiveTraits,
+	uniqueDnaTorrance,
+	passiveTraits,
 	layerConfigurations,
 	rarityDelimiter,
 	shuffleLayerConfigurations,
@@ -28,7 +28,7 @@ const {
 	generateCustomBackground,
 } = require(`${basePath}/src/customBackground.js`);
 const {
-  generatePassiveTraits,
+	generatePassiveTraits,
 } = require(`${basePath}/src/passiveTraits.js`);
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
@@ -100,28 +100,32 @@ const layersSetup = (layersOrder) => {
 		id: index,
 		elements: getElements(`${layersDir}/${layerObj.name}/`),
 		name:
-			layerObj.options?.["displayName"] != undefined
-				? layerObj.options?.["displayName"]
+			layerObj.options ?.["displayName"] != undefined
+				? layerObj.options ?.["displayName"]
 					: layerObj.name,
 		blend:
-			layerObj.options?.["blend"] != undefined
-				? layerObj.options?.["blend"]
+			layerObj.options ?.["blend"] != undefined
+				? layerObj.options ?.["blend"]
 					: "source-over",
 		opacity:
-			layerObj.options?.["opacity"] != undefined
-				? layerObj.options?.["opacity"]
+			layerObj.options ?.["opacity"] != undefined
+				? layerObj.options ?.["opacity"]
 					: 1,
 		bypassDNA:
-			layerObj.options?.["bypassDNA"] !== undefined
-				? layerObj.options?.["bypassDNA"]
+			layerObj.options ?.["bypassDNA"] !== undefined
+				? layerObj.options ?.["bypassDNA"]
 					: false,
 		ignore:
-			layerObj.options?.["ignore"] !== undefined
-				? layerObj.options?.["ignore"]
+			layerObj.options ?.["ignore"] !== undefined
+				? layerObj.options ?.["ignore"]
+					: false,
+		unlisted:
+			layerObj.options ?.["unlisted"] !== undefined
+				? layerObj.options ?.["unlisted"]
 					: false,
 		fitWith:
-			layerObj.options?.["fitWith"] !== undefined
-				? layerObj.options?.["fitWith"]
+			layerObj.options ?.["fitWith"] !== undefined
+				? layerObj.options ?.["fitWith"]
 					: null,
 	}));
 	return layers;
@@ -297,9 +301,9 @@ const isDnaUnique = (_DnaList = new Set(), _dna = "") => {
 };
 
 const getNamedElement = (_layer, _name) => {
-	for(let i=0; i<_layer.elements.length; i++) {
+	for (let i = 0; i < _layer.elements.length; i++) {
 		let element = _layer.elements[i];
-		if(element.name == _name) {
+		if (element.name == _name) {
 			return element;
 		}
 	}
@@ -317,12 +321,12 @@ const createDna = (_layers) => {
 	let postGenFitWith = [];
 
 	// Go over every layer and pick a random element
-	for(let i=0; i<_layers.length; i++) {
+	for (let i = 0; i < _layers.length; i++) {
 		let layer = _layers[i];
 		let element = help.pickElementFromWeightedLayer(layer);
 
 		// if ignore is flagged pick the none element, every folder should have a transparent none element
-		if(layer.ignore) {
+		if (layer.ignore) {
 			element = getNoneElement(layer);
 		}
 
@@ -332,23 +336,23 @@ const createDna = (_layers) => {
 		});
 
 		// if we have a fitWith option, remember it for later, fitWith is used for traits that use multiple layers
-		if(layer.fitWith) {
+		if (layer.fitWith) {
 			postGenFitWith.push({
-				name:element.name,
-				layerName:layer.fitWith
+				name: element.name,
+				layerName: layer.fitWith
 			});
 		}
 	}
 
 	// Go over every layer we need to fit with another
-	for(let i=0; i<postGenFitWith.length; i++) {
+	for (let i = 0; i < postGenFitWith.length; i++) {
 		let fitWith = postGenFitWith[i];
 		let elementName = fitWith.name;
 		let layerName = fitWith.layerName;
 
 		// Go over every layerElement to find the one that needs refitting
-		for(let j=0; j<layerElements.length; j++) {
-			if(layerName == layerElements[j].layer.name) {
+		for (let j = 0; j < layerElements.length; j++) {
+			if (layerName == layerElements[j].layer.name) {
 				layerElements[j].element = getNamedElement(layerElements[j].layer, elementName) || getNoneElement(layerElements[j].layer);
 			}
 		}
@@ -358,7 +362,7 @@ const createDna = (_layers) => {
 	layerElements.forEach(obj => {
 		randNumCompiled.push(
 			`${obj.element.id}:${obj.element.filename}${
-				obj.layer.bypassDNA ? "?bypassDNA=true" : ""
+			obj.layer.bypassDNA ? "?bypassDNA=true" : ""
 			}`
 		);
 	});
@@ -444,10 +448,10 @@ const startCreating = async () => {
 							gif.delay
 						);
 						hashlipsGiffer.start();
-          }
-          if(background.useCustomBackground) {
-            generateCustomBackground(ctx);
-          }
+					}
+					if (background.useCustomBackground) {
+						generateCustomBackground(ctx);
+					}
 					else if (background.generate) {
 						drawBackground();
 					}
@@ -468,10 +472,13 @@ const startCreating = async () => {
 						? console.log("Editions left to create: ", abstractedIndexes)
 						: null;
 					saveImage(abstractedIndexes[0]);
-          addMetadata(newDna, abstractedIndexes[0]);
-          help.clearIgnoredTraits(layers, metadataList[metadataList.length-1]);
-          passiveTraits ? generatePassiveTraits(metadataList[metadataList.length-1]) : null; 
-          // saves the last metadata piece to a file
+					addMetadata(newDna, abstractedIndexes[0]);
+					help.clearIgnoredTraits(layers, metadataList[metadataList.length - 1]);
+					help.clearNoneTraits(metadataList[metadataList.length - 1]);
+					help.clearUnlistedTraits(layers, metadataList[metadataList.length - 1]);
+					help.makeTraitsReadable(metadataList[metadataList.length - 1]);
+					passiveTraits ? generatePassiveTraits(metadataList[metadataList.length - 1]) : null;
+					// saves the last metadata piece to a file
 					saveMetaDataSingleFile(abstractedIndexes[0]);
 					console.log(
 						`Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(

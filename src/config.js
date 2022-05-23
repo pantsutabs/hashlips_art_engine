@@ -24,14 +24,16 @@ const solanaMetadata = {
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 21,
+    growEditionSizeTo: 32,
     layersOrder: [
       //{ name: "Background" },
       { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
       { name: "Hand_accessory", options: { displayName: "Hand accessory" } },
-      { name: "Body" },
+      { name: "Body", options: { unlisted: true } },
+      { name: "Body_overlay", options: { displayName: "Body overlay" } },
       { name: "Legs" },
       { name: "Bottom" },
+      { name: "Neck_accessory", options: { displayName: "Neck accessory" } },
       { name: "Top" },
       { name: "Facial_feature", options: { displayName: "Facial feature" } },
       { name: "Mouth" },
