@@ -316,7 +316,7 @@ const getNoneElement = (_layer) => {
 };
 
 // This selects the layers that will be used
-const createDna = (_layers) => {
+const createDna = (_layerConfiguration, _layers) => {
 	let layerElements = [];
 	let postGenFitWith = [];
 
@@ -354,6 +354,65 @@ const createDna = (_layers) => {
 		for (let j = 0; j < layerElements.length; j++) {
 			if (layerName == layerElements[j].layer.name) {
 				layerElements[j].element = getNamedElement(layerElements[j].layer, elementName) || getNoneElement(layerElements[j].layer);
+			}
+		}
+	}
+
+	// Go over every layer blocking trait and see if we need to remove any traits
+	if(_layerConfiguration.layersBlockOptions) {
+		let removeLayerNames = [];
+		for(let i=0; i < _layerConfiguration.layersBlockOptions.length; i++) {
+			let layerBlock = _layerConfiguration.layersBlockOptions[i];
+			let layerName = layerBlock.layerName;
+			let traitName = layerBlock.traitName;
+			let blocksLayerName = layerBlock.blocksLayerName;
+
+			for (let j = 0; j < layerElements.length; j++) {
+				if (layerName == layerElements[j].layer.name && layerElements[j].element.name == traitName) {
+					removeLayerNames.push(blocksLayerName);
+				}
+			}
+		}
+
+		// remove the layers marked for deletion
+		for (let j = 0; j < layerElements.length; j++) {
+			if (removeLayerNames.includes(layerElements[j].layer.name)) {
+				layerElements[j].element = getNoneElement(layerElements[j].layer);
+			}
+		}
+	}
+
+	// Go over every force option and see if we have traits that apply restrictions
+	// TODO: Make it support multiple layers of repicking
+	// TODO: When repicking consider weight, if 0 turn weight to whatever everything is weighed at
+	if(_layerConfiguration.traitForceOptions) {
+		let repickTraits = [];
+		for(let i=0; i < _layerConfiguration.traitForceOptions.length; i++) {
+			let layerForce = _layerConfiguration.traitForceOptions[i];
+			let layerName = layerForce.layerName;
+			let traitName = layerForce.traitName;
+			let forcedLayerName = layerForce.forcedLayerName;
+			let forcedTraitNames = layerForce.forcedTraitNames; //Array
+
+			for (let j = 0; j < layerElements.length; j++) {
+				if (layerName == layerElements[j].layer.name && layerElements[j].element.name == traitName) {
+					repickTraits.push({
+						layerName: forcedLayerName,
+						elementNames: forcedTraitNames
+					});
+				}
+			}
+		}
+		
+		// Repick from the allowed elements
+		for (let i = 0; i < repickTraits.length; i++) {
+			let layerName = repickTraits[i].layerName;
+			let elementNames = repickTraits[i].elementNames;
+
+			for (let j = 0; j < layerElements.length; j++) {
+				if (layerName == layerElements[j].layer.name && !elementNames.includes(layerElements[j].element.name)) {
+					layerElements[j].element = getNamedElement(layerElements[j].layer, elementNames[Math.floor(Math.random()*elementNames.length)]);
+				}
 			}
 		}
 	}
@@ -426,7 +485,7 @@ const startCreating = async () => {
 			layerConfigurations[layerConfigIndex].layersOrder
 		);
 		while (editionCount <= layerConfigurations[layerConfigIndex].growEditionSizeTo) {
-			let newDna = createDna(layers);
+			let newDna = createDna(layerConfigurations[layerConfigIndex], layers);
 			if (isDnaUnique(dnaList, newDna)) {
 				let results = constructLayerToDna(newDna, layers);
 				let loadedElements = [];

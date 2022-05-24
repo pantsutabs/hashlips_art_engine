@@ -25,6 +25,13 @@ const solanaMetadata = {
 const layerConfigurations = [
   {
     growEditionSizeTo: 32,
+    layersBlockOptions: [
+      { layerName: "Top", traitName: "Top_9_Sundress", blocksLayerName: "Bottom" }, // layerName has to equal displayName if the referenced layer has one
+      { layerName: "Top", traitName: "Top_13_Long sweater", blocksLayerName: "Bottom" },
+    ],
+    traitForceOptions: [
+      { layerName: "Top", traitName: "Top_6_Serafuku", forcedLayerName: "Bottom", forcedTraitNames: ["Bottom_3_Long skirt"] },
+    ],
     layersOrder: [
       //{ name: "Background" },
       { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
