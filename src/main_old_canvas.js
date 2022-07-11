@@ -3,7 +3,7 @@ const help = require(`${basePath}/src/help.js`);
 const { NETWORK } = require(`${basePath}/constants/network.js`);
 const fs = require("fs");
 const sha1 = require(`${basePath}/node_modules/sha1`);
-const { createCanvas, Image } = require(`${basePath}/node_modules/@napi-rs/canvas`);
+const { createCanvas, loadImage  } = require(`${basePath}/node_modules/canvas`);
 const buildDir = `${basePath}/build`;
 const layersDir = `${basePath}/layers`;
 const {
@@ -204,13 +204,7 @@ const addAttributes = (_element) => {
 const loadLayerImg = async (_layer) => {
 	try {
 		return new Promise(async (resolve) => {
-			/* const image = await loadImage(`${_layer.selectedElement.path}`); */
-
-			const file = await fs.promises.readFile(`${_layer.selectedElement.path}`);
-
-			const image = new Image();
-			image.src = file;
-
+			const image = await loadImage(`${_layer.selectedElement.path}`);
 			resolve({ layer: _layer, loadedImage: image });
 		});
 	} catch (error) {
@@ -364,7 +358,7 @@ const createDna = (_layerConfiguration, _layers) => {
 			let conditions = _layerConfiguration.generationConditions;
 			let repickLayers = {};
 		
-			// Figures out what to repick and how
+			// Reroll elements to fit conditions
 			for(let i=0; i<layerElements.length;i++) {
 				let layerElement = layerElements[i];
 
@@ -372,19 +366,18 @@ const createDna = (_layerConfiguration, _layers) => {
 					let condition = conditions[j];
 					let matchingElement = false;
 
-					// First we go over every selected element, and figure out if it creates requirements for other layers
 					if(layerElement.layer.name == condition.layer) {
-						// We want to match trait names, or trait tags
+						// We want to match trait names, and trait tags
 						if(condition.traits) {
 							condition.traits.forEach(condTraitName => {
 								// if condition trait is not a tag
-								/* if(condTraitName.includes("_")) { */
-								matchingElement = matchingElement || (condTraitName == layerElement.element.name);
-								/* } */
+								if(condTraitName.includes("_")) {
+									matchingElement = matchingElement || (condTraitName == layerElement.element.name);
+								}
 								// otherwise it's a tag // TODO: Should be deprecated
-								/* else {
+								else {
 									matchingElement = matchingElement || (layerElement.element.name.split("_").includes(condTraitName));
-								} */
+								}
 							});
 						}
 						// Also acknowledge .tags
@@ -393,7 +386,6 @@ const createDna = (_layerConfiguration, _layers) => {
 						}
 					}
 
-					// Second we record the new requirements for later
 					if(matchingElement) {
 						if(condition.forceTraits) {
 							for(let m=0; m<condition.forceTraits.length;m++) {
@@ -423,13 +415,6 @@ const createDna = (_layerConfiguration, _layers) => {
 								if(!repickLayers[forceTrait.layer].traits.includes("_none") && !forceTrait.excludeNone && getNoneElement(getLayer(_layers,forceTrait.layer)).weight > 0) {
 									repickLayers[forceTrait.layer].traits.push("_none");
 								}
-
-								if(forceTrait.disableSameColor) {
-									let colorTags = help.getTagsFromName(layerElement.layer.name, _layerConfiguration.colorTags);
-									colorTags.forEach(colorTag => {
-										repickLayers[forceTrait.layer].tags.push("-" + colorTag);
-									});
-								}
 							}
 						}
 
@@ -454,13 +439,6 @@ const createDna = (_layerConfiguration, _layers) => {
 								if(!repickLayers[forceTag.layer].traits.includes("_none") && !forceTag.excludeNone && getNoneElement(getLayer(_layers,forceTag.layer)).weight > 0) {
 									repickLayers[forceTag.layer].traits.push("_none");
 								}
-
-								if(forceTag.disableSameColor) {
-									let colorTags = help.getTagsFromName(layerElement.element.name, _layerConfiguration.colorTags);
-									colorTags.forEach(colorTag => {
-										repickLayers[forceTag.layer].tags.push(["-" + colorTag]);
-									});
-								}
 							}
 						}
 					}
@@ -476,7 +454,7 @@ const createDna = (_layerConfiguration, _layers) => {
 				repickLayers[repickLayerKey].tags = help.arrayUnique(repickLayers[repickLayerKey].tags);
 			}
 
-			// Repick layers based on new requirements derived from conditions earlier
+			// Repick layers based on conditions
 			for(let i=0; i<layerElements.length;i++) {
 				let layerElement = layerElements[i];
 

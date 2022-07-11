@@ -1,9 +1,71 @@
 module.exports = {
+    getTagsFromName: function(name, tags) {
+        let nameArr = name.split("_");
+        let foundTags = [];
+        nameArr.forEach(tag=> {
+            if(tags.includes(tag)) {
+                foundTags.push(tag);
+            }
+        });
+        return foundTags;
+    },
+    nameIncludesTags: function (name, conditionTags) {
+        let tags = name.split("_");
+        let passes = true;
+
+        if(conditionTags.length == 0) {
+            return false;
+        }
+
+        for(let i=0; i<conditionTags.length;i++) {
+            let condOrTags = conditionTags[i];
+            let atleastOnePasses = false;
+            let hardFail = false;
+
+            if(condOrTags.length == 0) {
+                passes = false;
+            }
+
+            for(let j=0; j<condOrTags.length;j++) {
+                let condnOrTag = condOrTags[j];
+
+                if(condnOrTag.charAt(0) == "-") {
+                    if(tags.includes(condnOrTag.substring(1))) {
+                        hardFail = true;
+                    }
+                    else {
+                        atleastOnePasses = true;
+                    }
+                }
+                else if(tags.includes(condnOrTag)) {
+                    atleastOnePasses = true;
+                }
+            }
+
+            if(!atleastOnePasses || hardFail) {
+                passes = false;
+            }
+
+            if(!passes) {
+                break;
+            }
+        }
+
+        return passes;
+    },
+    arrayUnique: function (arr) {
+        return arr.filter((v, i, a) => a.indexOf(v) === i);
+    },
     pickElementFromWeightedLayer: function (layer) {
         let totalWeight = 0;
         layer.elements.forEach((element) => {
             totalWeight += element.weight;
         });
+
+        /* if(layer.name=="Legs") {
+            console.log(" - picking from:", layer.name, "elements:", layer.elements.reduce((previousValue, currentValue) => (previousValue.name ? previousValue.name : previousValue) + "," + currentValue.name))
+        } */
+        
         // number between 0 - totalWeight
         let random = Math.floor(Math.random() * totalWeight);
         for (var i = 0; i < layer.elements.length; i++) {
