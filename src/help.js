@@ -1,4 +1,49 @@
+const basePath = process.cwd();
+const {
+	rngSeed,
+} = require(`${basePath}/src/config.js`);
+
+
+function prng (b) { 
+    for (var a = 0, c = b.length; c--;) {
+        a += b.charCodeAt(c), a += a << 10, a ^= a >> 6; 
+    }
+    a += a << 3; a ^= a >> 11; 
+    return ((a + (a << 15) & 4294967295) >>> 0);//.toString(16);
+}
+
+function prngWrapper (b) {
+    let prngj = prng(prng(b).toString(16)) + '';
+    let reversePrng = '';
+
+    for(let i = prngj.length; i--;) {
+        reversePrng = reversePrng + prngj.charAt(i);
+    }
+
+    return parseFloat('0.' + reversePrng);
+}
+
+function newPrngStream (seed) {
+    let rngIteration = 0;
+
+    return {
+        random: function () {
+            if(seed) {
+                rngIteration++;
+                return prngWrapper(seed + rngIteration);
+            }
+            else {
+                return Math.random();
+            }
+        }
+    }
+}
+
+let random = newPrngStream(rngSeed).random;
+
 module.exports = {
+    newPrngStream: newPrngStream,
+    random: random,
     getTagsFromName: function(name, tags) {
         let nameArr = name.split("_");
         let foundTags = [];
@@ -21,6 +66,10 @@ module.exports = {
             let condOrTags = conditionTags[i];
             let atleastOnePasses = false;
             let hardFail = false;
+
+            if(!condOrTags) {
+                console.log(name, JSON.stringify(conditionTags));
+            }
 
             if(condOrTags.length == 0) {
                 passes = false;
@@ -67,11 +116,11 @@ module.exports = {
         } */
         
         // number between 0 - totalWeight
-        let random = Math.floor(Math.random() * totalWeight);
+        let rand = Math.floor(random() * totalWeight);
         for (var i = 0; i < layer.elements.length; i++) {
             // subtract the current weight from the random weight until we reach a sub zero value.
-            random -= layer.elements[i].weight;
-            if (random < 0) {
+            rand -= layer.elements[i].weight;
+            if (rand < 0) {
                 return layer.elements[i];
             }
         }

@@ -21,13 +21,16 @@ const solanaMetadata = {
   ],
 };
 
+const rngSeed = "FemboyDAO"; // null to disable, this makes it so every NFT is predetermined
+
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 32,
+    growEditionSizeTo: 50,
     layersOrder: [
       //{ name: "Background" },
       { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
+      { name: "Back", options: { bypassDNA: true, ignore: true } },
       { name: "Hand_accessory", options: { displayName: "Hand accessory", fitWith:"Hand_accessory_top", } },
       { name: "Top_back", options: { bypassDNA: true, ignore: true } },
       { name: "Body", options: { unlisted: true } },
@@ -38,17 +41,50 @@ const layerConfigurations = [
       { name: "Neck_accessory", options: { displayName: "Neck accessory", fitWith:"Neck_accessory_top", } },
       { name: "Top", options: { fitWith:"Top_back", } },
       { name: "Neck_accessory_top", options: { bypassDNA: true, ignore: true } },
-      { name: "Hand_accessory_top", options: { bypassDNA: true, ignore: true } },
       { name: "Facial_feature", options: { displayName: "Facial feature", fitWith:"Facial_feature_top" } },
       { name: "Mouth" },
       { name: "Eyes" },
       /* { name: "Eye_cover_glass", options: { bypassDNA: true, ignore: true, opacity: 0.65 } },
       { name: "Eye_cover", options: { displayName: "Eye cover" } }, */
-      { name: "Facial_feature_top", options: { bypassDNA: true, ignore: true } },
+      { name: "Facial_feature_top", options: { bypassDNA: true, ignore: true, fitWith:"Facial_feature_top_2" } },
       { name: "Hair", options: { fitWith:"Hair_back", } }, // [Hair_back] will try to be matched with an element by the same name as the selected element in [Hair]
+      { name: "Facial_feature_top_2", options: { bypassDNA: true, ignore: true } },
       { name: "Earring" },
       { name: "Hairclip" },
+      { name: "Hand_accessory_top", options: { bypassDNA: true, ignore: true } },
 
+    ],
+
+    specialEditions:[
+      // Special version 0 femboy
+      {
+        id:1,
+        traits:{
+          "Hand accessory":"Hand_accessory_1_Knowledge",
+          "Body":"Body_2_Caramel",
+          "Bottom":"Bottom_H_SP_GRAY_10_Tight shorts",
+          "Top":"Top_L_CAS_WHITE_1_Off shoulder shirt",
+          "Mouth":"Mouth_3",
+          "Eyes":"Eyes_2_Purple",
+          "Hair":"Hair_HAIR1_BLONDE_NORMAL_EAR_Magma blonde",
+        }
+      },
+      // Cute Jules femboy
+      {
+        id:2,
+        traits:{
+          "Back":"Back_1_Brown cat tail#0",
+          "Body":"Body_1_Cream",
+          "Legs":"Legs_L_BLACK_1_Thigh highs black",
+          "Bottom":"Bottom_S_BLUE_17_Serafuku skirt#5",
+          "Neck accessory":"Neck_accessory_5_Collar",
+          "Top":"Top_S_WHITE_20_Serafuku#5",
+          "Facial feature":"Ff_10_SPECIAL_Glasses#0",
+          "Mouth":"Mouth_1",
+          "Eyes":"Eyes_1_Brown big#0",
+          "Hair":"Hair_HAIR8_BROWN_NORMAL_NOEAR_Ruffle brown eared#5"
+        }
+      }
     ],
 
     colorTags:["WHITE","GRAY","BLACK",
@@ -58,21 +94,6 @@ const layerConfigurations = [
       "PURPLE","PINK"],
 
     generationConditions: [
-      // HAIR -> EARRING
-      {
-        layer: "Hair", tags: [["NOEAR"]],
-        blockLayers: ["Earring"],
-      },
-      {
-        layer: "Hair", tags: [["EARSM"]],
-        forceTags: [{
-          layer:"Earring",
-          tags:[["SMALL"]],
-          disableSameColor:true
-        }]
-      },
-
-
       // HAIR -> HAIRCLIP
       {
         layer: "Hair", tags: [["HAIR1"]],
@@ -134,6 +155,50 @@ const layerConfigurations = [
       {
         layer: "Hair", tags: [["HAIR20"]],
         forceTags: [{layer:"Hairclip",tags:[["HAIR20"]],disableSameColor:true}]},
+
+
+        
+      // HAIR -> EARRING
+      {
+        layer: "Hair", tags: [["NOEAR"]],
+        blockLayers: ["Earring"],
+      },
+      {
+        layer: "Hair", tags: [["EARSM"]],
+        forceTags: [{
+          layer:"Earring",
+          tags:[["SMALL"]],
+          disableSameColor:true,
+          excludeNone:true
+        }]
+      },
+      {
+        layer: "Hair", tags: [["EAR"],["-HAIR3"]],
+        forceTags: [{
+          layer:"Earring",
+          tags:[["BIG","SMALL"]],
+          disableSameColor:true
+        }]
+      },
+      // Special case, loop looks weird with hair 3
+      {
+        layer: "Hair", tags: [["HAIR3"]],
+        forceTags: [{
+          layer:"Earring",
+          tags:[["BIG","SMALL"],["-Loop"]],
+          disableSameColor:true
+        }]
+      },
+
+
+      // HAIR -> FACIAL FEATURE
+      {
+        layer: "Hair", tags: [["COVERL"]],
+        forceTags: [{
+          layer:"Facial feature",
+          tags:[["M","R"]],
+        }]
+      },
       
 
       // LONG
@@ -148,8 +213,13 @@ const layerConfigurations = [
       },
       // Cyber neck overlays block neck accessories
       {
-        layer: "Body overlay", trait: "Body_overlay_3_Cyber neck",
+        layer: "Body overlay", traits: ["Body_overlay_3_Cyber neck"],
         blockLayers: ["Neck accessory"],
+      },
+      // DISABLE THIGHS WITH COLORED LEGS
+      {
+        layer: "Legs", tags: [["PINK","WHITE"]],
+        blockLayers: ["Thighs"],
       },
 
       // SPECIALS
@@ -173,6 +243,31 @@ const layerConfigurations = [
           tags:[["HT","H","L"],["BLACK","BLACKT"]]
         }]
       },
+      // DOLL DRESS
+      {
+        layer: "Top", traits: ["Top_SPECIAL_LONG_25_Doll dress#4"],
+        forceTraits: [{
+          layer:"Legs",
+          traits:["Legs_T_BLACKT_14_Light tights","Legs_T_BLACKT_5_Tights","Legs_L_GRAY_4_Kitty","Legs_L_GRAY_1_Thigh highs","Legs_L_GRAY_1_Thigh highs stripes#5"]
+        }]
+      },
+      // MAID OUTFITS
+      {
+        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress"],
+        forceTags: [{
+          layer:"Legs",
+          excludeNone:true,
+          tags:[["WHITE","BLACK","BLACKT"]]
+        }]
+      },
+      {
+        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress pink#4"],
+        forceTags: [{
+          layer:"Legs",
+          excludeNone:true,
+          tags:[["WHITE","PINK"]]
+        }]
+      },
       // OVERALLS
       {
         layer: "Top", traits: ["TOP_SPECIAL_DENIM_LONG_Overalls#1"],
@@ -186,7 +281,7 @@ const layerConfigurations = [
         layer: "Top", traits: ["Top_SPECIAL_Dance top 1#2","Top_SPECIAL_Dance top 2#1"],
         forceTraits: [{
           layer:"Bottom",
-          traits:["Bottom_SPECIAL_PANT_Dance suit 2#0","Bottom_SPECIAL_PANT_Dance suit#0"]
+          traits:["Bottom_SPECIAL_Dance suit#0","Bottom_SPECIAL_Dance suit 2#0"]
         }]
       },
       // MODERN TOP
@@ -205,17 +300,18 @@ const layerConfigurations = [
         }],
       },
 
+
       // SCHOOL
       // SCHOOL GYM TOPS
       {
-        layer: "Top", traits: ["Top_SG_BLUE_14_Gym uniform#5"],
+        layer: "Top", traits: ["Top_SG_BLUE_14_Gym uniform#5","Top_SG_BLUE_15_Short gym uniform#5"],
         forceTags: [{
           layer:"Bottom",
           tags:[["SG"],["BLUE"]]
         }],
       },
       {
-        layer: "Top", traits: ["Top_SG_RED_15_Gym uniform 2#5"],
+        layer: "Top", traits: ["Top_SG_RED_15_Gym uniform 2#5","Top_SG_RED_15_Short gym uniform 2#5"],
         forceTags: [{
           layer:"Bottom",
           tags:[["SG"],["RED"]]
@@ -252,39 +348,53 @@ const layerConfigurations = [
         }],
       },
       {
-        layer: "Top", traits: ["Top_S2_WHITE_26_School top","Top_S2_BLACK_27_School top sweater"],
+        layer: "Top", traits: ["Top_S2_WHITE_26_School top","Top_S2_BLACK_27_School top sweater","Top_S2_BLACK_26_School coat"],
         forceTags: [{
           layer:"Bottom",
           tags:[["S"],["BLACK","BLUE"]]
         }],
       },
+      {
+        layer: "Top", traits: ["Top_S2_YELLOW_26_Suspicious school coat#3"],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["S"],["YELLOW"]]
+        }],
+      },
       // SCHOOL BOTTOMS
       {
-        layer: "Bottom", traits: ["Bottom_S_BLUE_17_Serafuku skirt"],
+        layer: "Bottom", traits: ["Bottom_S_BLUE_17_Serafuku skirt#5","Bottom_S_BLACK_17_Serafuku skirt short#5"],
         forceTags: [{
           layer:"Legs",
           tags:[["L","H","T"],["BLUE","BLACK","WHITE","BLACKT"]]
         }],
       },
       {
-        layer: "Bottom", traits: ["Bottom_S_RED_17_Serafuku skirt 2"],
+        layer: "Bottom", traits: ["Bottom_S_RED_17_Serafuku skirt 2#5","Bottom_S_BLACK_17_Serafuku skirt 2 short#5"],
         forceTags: [{
           layer:"Legs",
           tags:[["L","H","T"],["RED","BLACK","WHITE","BLACKT"]]
         }],
       },
       {
-        layer: "Bottom", traits: ["Bottom_S_BLACK_17_Serafuku skirt 3"],
+        layer: "Bottom", traits: ["Bottom_S_BLACK_17_Serafuku skirt 3#5","Bottom_S_BLACK_17_Serafuku skirt 3 short#5"],
         forceTags: [{
           layer:"Legs",
           tags:[["L","H","T"],["BLACK","WHITE","BLACKT"]]
+        }],
+      },
+      {
+        layer: "Bottom", traits: ["Bottom_S_YELLOW_17_Suspicious serafuku skirt"],
+        forceTraits: [{
+          layer:"Legs",
+          traits:["Legs_L_BLACK_7_Socks black","Legs_L_BLACK_1_Thigh highs black"]
         }],
       },
 
       // OFFICE
       // OFFICE TOPS
       {
-        layer: "Top", traits: ["Top_O_WHITE_17_Buttoned","Top_O_WHITE_22_Office sweater","Top_O_WHITE_25_Exotic office shirt","Top_O_WHITE_16_Loose#5"],
+        layer: "Top", tags: [["O"],["WHITE"],["-LONG"]],
         forceTags: [{
           layer:"Bottom",
           tags:[["O"],["GRAY","RED"]]
@@ -306,7 +416,7 @@ const layerConfigurations = [
       },
       // OFFICE SWEATERS
       {
-        layer: "Top", traits: ["Top_O_WHITE_LONG_22_Long office sweater#4","Top_O_RED_LONG_22_Long office sweater red#2","Top_O_PINK_LONG_22_Long office sweater pink#1","Top_O_GRAY_LONG_22_Long office sweater gray#2"],
+        layer: "Top", tags: [["LONG"],["O"]],
         forceTraits: [{
           layer:"Legs",
           traits:["Legs_H_GRAY_1_Thigh highs strapped"]
@@ -332,7 +442,7 @@ const layerConfigurations = [
       // SECURITY
       // SECURITY TOPS
       {
-        layer: "Top", traits: ["Top_SEC_GRAY_32_Combat vest","Top_SEC_GRAY_34_Vest used#5","Top_SEC_GRAY_34_Vest#5","Top_SEC_GRAY_35_Heavy vest"],
+        layer: "Top", tags: [["SEC"]],
         forceTags: [{
           layer:"Bottom",
           tags:[["SP","CAS","S","O","CYB"],["GRAY","DENIM","BLUE","RED","PINK"],["H","S","O","CYB"]]
@@ -342,7 +452,7 @@ const layerConfigurations = [
       // CYBER
       // CYBER TOPS
       {
-        layer: "Top", traits: ["Top_CYB_GRAY_29_Jacket","Top_CYB_GRAY_33_Jacket 2"],
+        layer: "Top", tags: [["CYB"]],
         forceTags: [{
           layer:"Bottom",
           tags:[["SP","CAS","CYB"],["GRAY","DENIM","BLUE","RED","PINK","BLACK"],["H","CYB"]]
@@ -554,7 +664,7 @@ const rarityDelimiter = "#";
 
 const uniqueDnaTorrance = 10000;
 
-const passiveTraits = true;
+const passiveTraits = false; // true;
 
 const preview = {
   thumbPerRow: 5,
@@ -579,6 +689,7 @@ module.exports = {
   background,
   uniqueDnaTorrance,
   passiveTraits,
+  rngSeed,
   layerConfigurations,
   averageTraitWeight,
   rarityDelimiter,

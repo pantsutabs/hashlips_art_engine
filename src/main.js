@@ -140,7 +140,7 @@ const saveImage = (_editionCount) => {
 };
 
 const genColor = () => {
-	let hue = Math.floor(Math.random() * 360);
+	let hue = Math.floor(help.random() * 360);
 	let pastel = `hsl(${hue}, 100%, ${background.brightness})`;
 	return pastel;
 };
@@ -308,9 +308,10 @@ const isDnaUnique = (_DnaList = new Set(), _dna = "") => {
 };
 
 const getNamedElement = (_layer, _name) => {
+	let name = _name.split("#")[0];
 	for (let i = 0; i < _layer.elements.length; i++) {
 		let element = _layer.elements[i];
-		if (element.name == _name) {
+		if (element.name == name) {
 			return element;
 		}
 	}
@@ -336,215 +337,254 @@ const getLayer = (_layers, _layerName) => {
 }
 
 // This selects the layers that will be used
-const createDna = (_layerConfiguration, _layers) => {
+const createDna = (_layerConfiguration, _layers, _editionNum) => {
 	let layerElements = [];
+	let specialEditionCreated = false;
 
-	// Go over every layer and pick a random element
-	for (let i = 0; i < _layers.length; i++) {
-		let layer = _layers[i];
-		let element = help.pickElementFromWeightedLayer(layer);
+	for(let i=0; i<_layerConfiguration.specialEditions.length; i++) {
+		let specialEd = _layerConfiguration.specialEditions[i];
 
-		// if ignore is flagged pick the none element, every folder should have a transparent none element
-		if (layer.ignore) {
-			element = getNoneElement(layer);
-		}
+		if(_editionNum == specialEd.id) {
+			// Go over every layer and pick a specified element
+			for (let i = 0; i < _layers.length; i++) {
+				let layer = _layers[i];
+				let element = getNoneElement(layer);
 
-		layerElements.push({
-			element: element,
-			layer: layer,
-			nonePickedTimes:0 // This is a hackey solution to avoid none being overrepresented
-		});
-	}
-
-	// Go over conditions and see if we require repicking elements, there is a soft hierarchy so "tops" lead "bottoms" which lead "legs" and so on
-	{
-		let repickedSomething = true;
-		while(repickedSomething) {
-			repickedSomething = false;
-			let conditions = _layerConfiguration.generationConditions;
-			let repickLayers = {};
-		
-			// Figures out what to repick and how
-			for(let i=0; i<layerElements.length;i++) {
-				let layerElement = layerElements[i];
-
-				for(let j=0; j<conditions.length;j++) {
-					let condition = conditions[j];
-					let matchingElement = false;
-
-					// First we go over every selected element, and figure out if it creates requirements for other layers
-					if(layerElement.layer.name == condition.layer) {
-						// We want to match trait names, or trait tags
-						if(condition.traits) {
-							condition.traits.forEach(condTraitName => {
-								// if condition trait is not a tag
-								/* if(condTraitName.includes("_")) { */
-								matchingElement = matchingElement || (condTraitName == layerElement.element.name);
-								/* } */
-								// otherwise it's a tag // TODO: Should be deprecated
-								/* else {
-									matchingElement = matchingElement || (layerElement.element.name.split("_").includes(condTraitName));
-								} */
-							});
-						}
-						// Also acknowledge .tags
-						if(condition.tags) {
-							matchingElement = matchingElement || help.nameIncludesTags(layerElement.element.name, condition.tags);
-						}
-					}
-
-					// Second we record the new requirements for later
-					if(matchingElement) {
-						if(condition.forceTraits) {
-							for(let m=0; m<condition.forceTraits.length;m++) {
-								let forceTrait = condition.forceTraits[m];
-
-								if(repickLayers[forceTrait.layer] && repickLayers[forceTrait.layer].important) {
-									continue;
-								}
-
-								if(!repickLayers[forceTrait.layer]) {
-									repickLayers[forceTrait.layer] = {
-										traits: [],
-										tags: [],
-									}	
-								}
-
-								if(forceTrait.important) {
-									repickLayers[forceTrait.layer].important = true;
-									repickLayers[forceTrait.layer].tags = [];
-									repickLayers[forceTrait.layer].traits = forceTrait.traits;
-									continue;
-								}
-
-								repickLayers[forceTrait.layer].traits = repickLayers[forceTrait.layer].traits.concat(forceTrait.traits);
-
-								// Add none if it has weight, and condition doesn't disallow it
-								if(!repickLayers[forceTrait.layer].traits.includes("_none") && !forceTrait.excludeNone && getNoneElement(getLayer(_layers,forceTrait.layer)).weight > 0) {
-									repickLayers[forceTrait.layer].traits.push("_none");
-								}
-
-								if(forceTrait.disableSameColor) {
-									let colorTags = help.getTagsFromName(layerElement.layer.name, _layerConfiguration.colorTags);
-									colorTags.forEach(colorTag => {
-										repickLayers[forceTrait.layer].tags.push("-" + colorTag);
-									});
-								}
-							}
-						}
-
-						if(condition.forceTags) {
-							for(let m=0; m<condition.forceTags.length;m++) {
-								let forceTag = condition.forceTags[m];
-
-								if(repickLayers[forceTag.layer] && repickLayers[forceTag.layer].important) {
-									continue;
-								}
-
-								if(!repickLayers[forceTag.layer]) {
-									repickLayers[forceTag.layer] = {
-										traits: [],
-										tags: [],
-									}	
-								}
-
-								repickLayers[forceTag.layer].tags = repickLayers[forceTag.layer].tags.concat(forceTag.tags);
-								
-								// Add none if it has weight, and condition doesn't disallow it
-								if(!repickLayers[forceTag.layer].traits.includes("_none") && !forceTag.excludeNone && getNoneElement(getLayer(_layers,forceTag.layer)).weight > 0) {
-									repickLayers[forceTag.layer].traits.push("_none");
-								}
-
-								if(forceTag.disableSameColor) {
-									let colorTags = help.getTagsFromName(layerElement.element.name, _layerConfiguration.colorTags);
-									colorTags.forEach(colorTag => {
-										repickLayers[forceTag.layer].tags.push(["-" + colorTag]);
-									});
-								}
-							}
-						}
-					}
+				if(specialEd.traits[layer.name]) {
+					element = getNamedElement(layer, specialEd.traits[layer.name]);
 				}
-			}
 
-			// makes sure that filtered traits/tags don't repeat, repeating traits would be likelier to get selected, not desired behavior
-			let repickLayersKeys = Object.keys(repickLayers);
-			for(let i=0; i<repickLayersKeys.length;i++) {
-				let repickLayerKey = repickLayersKeys[i];
-
-				repickLayers[repickLayerKey].traits = help.arrayUnique(repickLayers[repickLayerKey].traits);
-				repickLayers[repickLayerKey].tags = help.arrayUnique(repickLayers[repickLayerKey].tags);
-			}
-
-			// Repick layers based on new requirements derived from conditions earlier
-			for(let i=0; i<layerElements.length;i++) {
-				let layerElement = layerElements[i];
-
-				if(repickLayers[layerElement.layer.name]) {
-					let repick = repickLayers[layerElement.layer.name];
-					let fakeLayer = {name:layerElement.layer.name,elements:[]};
-					let repickedItemAlreadyPicked = false;
-
-					for(let j=0; j<layerElement.layer.elements.length;j++) {
-						let element = layerElement.layer.elements[j];
-						if(repick.traits.includes(element.name) ||
-							help.nameIncludesTags(element.name, repick.tags)) {
-
-							// Note if a possible item is already a picked one, no reason to repick
-							if(element.name == layerElement.element.name) {
-								if(element.name == "_none" && layerElement.nonePickedTimes < 1) {
-									layerElement.nonePickedTimes++;
-								}
-								else {
-									repickedItemAlreadyPicked = true;
-								}
-							}
-
-							fakeLayer.elements.push({
-								name:element.name, 
-								weight: element.weight > 0 ? element.weight : averageTraitWeight
-							});
-						}
-					}
-					
-					if(fakeLayer.elements.length == 0) {
-						console.log("ISSUE FINDING ELEMENTS", JSON.stringify(repick, null, 2));
-					}
-
-					if(!repickedItemAlreadyPicked) {
-						let newElementName = help.pickElementFromWeightedLayer(fakeLayer);
-						let newElement = getNamedElement(layerElement.layer, newElementName.name);
-						layerElement.element = newElement;
-						repickedSomething = true;
-					}
-				}
-			}
-		}
-	}
-
-	{
-		let postGenFitWith = [];
-		// Correct fit with options, this should be done last
-		for (let i = 0; i < layerElements.length; i++) {
-			// if we have a fitWith option, remember it for later, fitWith is used for traits that use multiple layers
-			if (layerElements[i].layer.fitWith) {
-				postGenFitWith.push({
-					name: layerElements[i].element.name,
-					layerName: layerElements[i].layer.fitWith
+				layerElements.push({
+					element: element,
+					layer: layer,
+					nonePickedTimes:0 // This is a hackey solution to avoid none being overrepresented
 				});
 			}
+
+			specialEditionCreated = true;
+			break;
+		}
+	}
+
+	if(!specialEditionCreated) {
+		// Go over every layer and pick a random element
+		for (let i = 0; i < _layers.length; i++) {
+			let layer = _layers[i];
+			let element = help.pickElementFromWeightedLayer(layer);
+
+			// if ignore is flagged pick the none element, every folder should have a transparent none element
+			if (layer.ignore) {
+				element = getNoneElement(layer);
+			}
+
+			layerElements.push({
+				element: element,
+				layer: layer,
+				nonePickedTimes:0 // This is a hackey solution to avoid none being overrepresented
+			});
 		}
 
-		// Go over every layer we need to fit with another
-		for (let i = 0; i < postGenFitWith.length; i++) {
-			let fitWith = postGenFitWith[i];
-			let elementName = fitWith.name;
-			let layerName = fitWith.layerName;
+		// Go over conditions and see if we require repicking elements, there is a soft hierarchy so "tops" lead "bottoms" which lead "legs" and so on
+		{
+			let repickedSomething = true;
+			while(repickedSomething) {
+				repickedSomething = false;
+				let conditions = _layerConfiguration.generationConditions;
+				let repickLayers = {};
+			
+				// Figures out what to repick and how
+				for(let i=0; i<layerElements.length;i++) {
+					let layerElement = layerElements[i];
 
-			// Go over every layerElement to find the one that needs refitting
-			for (let j = 0; j < layerElements.length; j++) {
-				if (layerName == layerElements[j].layer.name) {
-					layerElements[j].element = getNamedElement(layerElements[j].layer, elementName) || getNoneElement(layerElements[j].layer);
+					for(let j=0; j<conditions.length;j++) {
+						let condition = conditions[j];
+						let matchingElement = false;
+
+						// First we go over every selected element, and figure out if it creates requirements for other layers
+						if(layerElement.layer.name == condition.layer) {
+							// We want to match trait names, or trait tags
+							if(condition.traits) {
+								condition.traits.forEach(condTraitName => {
+									// if condition trait is not a tag
+									/* if(condTraitName.includes("_")) { */
+									matchingElement = matchingElement || (condTraitName == layerElement.element.name);
+									/* } */
+									// otherwise it's a tag // TODO: Should be deprecated
+									/* else {
+										matchingElement = matchingElement || (layerElement.element.name.split("_").includes(condTraitName));
+									} */
+								});
+							}
+							// Also acknowledge .tags
+							if(condition.tags) {
+								matchingElement = matchingElement || help.nameIncludesTags(layerElement.element.name, condition.tags);
+							}
+						}
+
+						// Second we record the new requirements for later
+						if(matchingElement) {
+							if(condition.forceTraits) {
+								for(let m=0; m<condition.forceTraits.length;m++) {
+									let forceTrait = condition.forceTraits[m];
+
+									if(repickLayers[forceTrait.layer] && repickLayers[forceTrait.layer].important) {
+										continue;
+									}
+
+									if(!repickLayers[forceTrait.layer]) {
+										repickLayers[forceTrait.layer] = {
+											traits: [],
+											tags: [],
+										}	
+									}
+
+									if(forceTrait.important) {
+										repickLayers[forceTrait.layer].important = true;
+										repickLayers[forceTrait.layer].tags = [];
+										repickLayers[forceTrait.layer].traits = forceTrait.traits;
+										continue;
+									}
+
+									repickLayers[forceTrait.layer].traits = repickLayers[forceTrait.layer].traits.concat(forceTrait.traits);
+
+									// Add none if it has weight, and condition doesn't disallow it
+									if(!repickLayers[forceTrait.layer].traits.includes("_none") && !forceTrait.excludeNone && getNoneElement(getLayer(_layers,forceTrait.layer)).weight > 0) {
+										repickLayers[forceTrait.layer].traits.push("_none");
+									}
+
+									if(forceTrait.disableSameColor) {
+										let colorTags = help.getTagsFromName(layerElement.layer.name, _layerConfiguration.colorTags);
+										colorTags.forEach(colorTag => {
+											repickLayers[forceTrait.layer].tags.push("-" + colorTag);
+										});
+									}
+								}
+							}
+
+							if(condition.forceTags) {
+								for(let m=0; m<condition.forceTags.length;m++) {
+									let forceTag = condition.forceTags[m];
+
+									if(repickLayers[forceTag.layer] && repickLayers[forceTag.layer].important) {
+										continue;
+									}
+
+									if(!repickLayers[forceTag.layer]) {
+										repickLayers[forceTag.layer] = {
+											traits: [],
+											tags: [],
+										}	
+									}
+
+									repickLayers[forceTag.layer].tags = repickLayers[forceTag.layer].tags.concat(forceTag.tags);
+									
+									// Add none if it has weight, and condition doesn't disallow it
+									if(!repickLayers[forceTag.layer].traits.includes("_none") && !forceTag.excludeNone && getNoneElement(getLayer(_layers,forceTag.layer)).weight > 0) {
+										repickLayers[forceTag.layer].traits.push("_none");
+									}
+
+									if(forceTag.disableSameColor) {
+										let colorTags = help.getTagsFromName(layerElement.element.name, _layerConfiguration.colorTags);
+										colorTags.forEach(colorTag => {
+											repickLayers[forceTag.layer].tags.push(["-" + colorTag]);
+										});
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// makes sure that filtered traits/tags don't repeat, repeating traits would be likelier to get selected, not desired behavior
+				let repickLayersKeys = Object.keys(repickLayers);
+				for(let i=0; i<repickLayersKeys.length;i++) {
+					let repickLayerKey = repickLayersKeys[i];
+
+					repickLayers[repickLayerKey].traits = help.arrayUnique(repickLayers[repickLayerKey].traits);
+					repickLayers[repickLayerKey].tags = help.arrayUnique(repickLayers[repickLayerKey].tags);
+				}
+
+				// Repick layers based on new requirements derived from conditions earlier
+				for(let i=0; i<layerElements.length;i++) {
+					let layerElement = layerElements[i];
+
+					if(repickLayers[layerElement.layer.name]) {
+						let repick = repickLayers[layerElement.layer.name];
+						let fakeLayer = {name:layerElement.layer.name,elements:[]};
+						let repickedItemAlreadyPicked = false;
+
+						for(let j=0; j<layerElement.layer.elements.length;j++) {
+							let element = layerElement.layer.elements[j];
+							if(repick.traits.includes(element.name) ||
+								help.nameIncludesTags(element.name, repick.tags)) {
+
+								// Note if a possible item is already a picked one, no reason to repick
+								if(element.name == layerElement.element.name) {
+									if(element.name == "_none" && layerElement.nonePickedTimes < 1) {
+										layerElement.nonePickedTimes++;
+									}
+									else {
+										repickedItemAlreadyPicked = true;
+									}
+								}
+
+								fakeLayer.elements.push({
+									name:element.name, 
+									weight: element.weight > 0 ? element.weight : averageTraitWeight
+								});
+							}
+						}
+						
+						if(fakeLayer.elements.length == 0) {
+							console.log("ISSUE FINDING ELEMENTS", JSON.stringify(repick, null, 2));
+						}
+
+						if(!repickedItemAlreadyPicked) {
+							let newElementName = help.pickElementFromWeightedLayer(fakeLayer);
+							let newElement = getNamedElement(layerElement.layer, newElementName.name);
+							layerElement.element = newElement;
+							repickedSomething = true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Fits fitWith options
+	{
+		let matchedFitWith = true;
+		while(matchedFitWith) {
+			matchedFitWith = false;
+			let postGenFitWith = [];
+			// Correct fit with options, this should be done last
+			for (let i = 0; i < layerElements.length; i++) {
+				// if we have a fitWith option, remember it for later, fitWith is used for traits that use multiple layers
+				if (layerElements[i].layer.fitWith) {
+					postGenFitWith.push({
+						name: layerElements[i].element.name,
+						layerName: layerElements[i].layer.fitWith
+					});
+				}
+			}
+
+			// Go over every layer we need to fit with another
+			for (let i = 0; i < postGenFitWith.length; i++) {
+				let fitWith = postGenFitWith[i];
+				let elementName = fitWith.name;
+				let layerName = fitWith.layerName;
+
+				// Go over every layerElement to find the one that needs refitting
+				for (let j = 0; j < layerElements.length; j++) {
+					if (layerName == layerElements[j].layer.name) {
+						let newElement = getNamedElement(layerElements[j].layer, elementName) || getNoneElement(layerElements[j].layer);
+
+						if(newElement.name != "_none" && elementName != layerElements[j].element.name) {
+							matchedFitWith = true;
+						}
+						
+						layerElements[j].element = newElement;
+					}
 				}
 			}
 		}
@@ -584,7 +624,7 @@ function shuffle(array) {
 	let currentIndex = array.length,
 		randomIndex;
 	while (currentIndex != 0) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
+		randomIndex = Math.floor(help.random() * currentIndex);
 		currentIndex--;
 		[array[currentIndex], array[randomIndex]] = [
 			array[randomIndex],
@@ -649,7 +689,7 @@ const startCreating = async () => {
 		});
 
 		while (editionCount <= layerConfigurations[layerConfigIndex].growEditionSizeTo) {
-			let {newDna, layerElements} = createDna(layerConfigurations[layerConfigIndex], layers);
+			let {newDna, layerElements} = createDna(layerConfigurations[layerConfigIndex], layers, abstractedIndexes[0]);
 			if (isDnaUnique(dnaList, newDna)) {
 				let results = constructLayerToDna(newDna, layers);
 				let loadedElements = [];
@@ -678,7 +718,7 @@ const startCreating = async () => {
 					else if (background.generate) {
 						drawBackground();
 					}
-					renderObjectArray.forEach((renderObject, index) => {
+					/* renderObjectArray.forEach((renderObject, index) => {
 						drawElement(
 							renderObject,
 							index,
@@ -687,7 +727,7 @@ const startCreating = async () => {
 						if (gif.export) {
 							hashlipsGiffer.add();
 						}
-					});
+					}); */
 					if (gif.export) {
 						hashlipsGiffer.stop();
 					}
