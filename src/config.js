@@ -23,6 +23,8 @@ const solanaMetadata = {
 
 const rngSeed = "FemboyDAO"; // null to disable, this makes it so every NFT is predetermined
 
+const traitOutline = false;
+
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
@@ -690,6 +692,7 @@ module.exports = {
   uniqueDnaTorrance,
   passiveTraits,
   rngSeed,
+  traitOutline,
   layerConfigurations,
   averageTraitWeight,
   rarityDelimiter,

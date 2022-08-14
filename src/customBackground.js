@@ -662,12 +662,12 @@ const generateCustomBackground = (layerConfiguration, layerElements, ctx) => {
 	ctx.fillRect(0, 0, format.width, format.height);
 
 	let bgs = [
-		genBackground1, // linear lines
-		genBackground2, // arrow down
-		genBackground3, // zigzag
-		genBackground4, // floating squares
-		genBackground5, // shaded squares
-		genBackground6, // big diamond
+		genBackground1, // linear lines // BAD
+		genBackground2, // arrow down // BAD
+		genBackground3, // zigzag // BAD
+		genBackground4, // floating squares // Need reimagining
+		genBackground5, // shaded squares // Great, could use more shapes
+		genBackground6, // big diamond // Need reimagining
 	];
 
 	//bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);

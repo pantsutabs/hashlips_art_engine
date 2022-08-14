@@ -18,6 +18,7 @@ const {
 	rarityDelimiter,
 	shuffleLayerConfigurations,
 	debugLogs,
+	traitOutline,
 	extraMetadata,
 	text,
 	namePrefix,
@@ -224,6 +225,28 @@ const addText = (_sig, x, y, size) => {
 	ctx.textBaseline = text.baseline;
 	ctx.textAlign = text.align;
 	ctx.fillText(_sig, x, y);
+};
+
+const drawElementDestOut = (_renderObject, _index, _layersLen) => {
+	ctx.globalAlpha = _renderObject.layer.opacity;
+	ctx.globalCompositeOperation = "destination-out";
+	text.only
+		? addText(
+			`${_renderObject.layer.name}${text.spacer}${_renderObject.layer.selectedElement.name}`,
+			text.xGap,
+			text.yGap * (_index + 1),
+			text.size
+		)
+		: ctx.drawImage(
+			_renderObject.loadedImage,
+			0,
+			0,
+			format.width,
+			format.height
+		);
+
+	addAttributes(_renderObject);
+	ctx.globalCompositeOperation = _renderObject.layer.blend;
 };
 
 const drawElement = (_renderObject, _index, _layersLen) => {
@@ -718,16 +741,42 @@ const startCreating = async () => {
 					else if (background.generate) {
 						drawBackground();
 					}
-					/* renderObjectArray.forEach((renderObject, index) => {
-						drawElement(
-							renderObject,
-							index,
-							layerConfigurations[layerConfigIndex].layersOrder.length
-						);
-						if (gif.export) {
-							hashlipsGiffer.add();
-						}
-					}); */
+					/* if(traitOutline) {
+						This is stupid, doesn't significantly improve the collection, and would take forever, may not even work (surely there's a better way to do this)
+						draw the nft without a background 
+						save
+						draw the background
+						load the previous image, and draw it around with DestOut, this creates a hole
+						draw the nft normally
+						save
+						draw a plain canvas colored with the previously used color scheme [0] color
+						load the previous image and place it on top, now the empty hole is filled
+						save
+
+						renderObjectArray.forEach((renderObject, index) => {
+							drawElementDestOut(
+								renderObject,
+								index,
+								layerConfigurations[layerConfigIndex].layersOrder.length
+							);
+							if (gif.export) {
+								hashlipsGiffer.add();
+							}
+						});
+					} */
+					/* else */ {
+						// draws the traits normally
+						renderObjectArray.forEach((renderObject, index) => {
+							drawElement(
+								renderObject,
+								index,
+								layerConfigurations[layerConfigIndex].layersOrder.length
+							);
+							if (gif.export) {
+								hashlipsGiffer.add();
+							}
+						});
+					}
 					if (gif.export) {
 						hashlipsGiffer.stop();
 					}
