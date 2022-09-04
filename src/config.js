@@ -21,21 +21,21 @@ const solanaMetadata = {
   ],
 };
 
-const rngSeed = "FemboyDAO"; // null to disable, this makes it so every NFT is predetermined
+const rngSeed = null;//"FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
 
 const traitOutline = false;
 
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 50,
+    growEditionSizeTo: 500,
     layersOrder: [
-      //{ name: "Background" },
       { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
-      { name: "Back", options: { bypassDNA: true, ignore: true } },
+      { name: "Back" },
       { name: "Hand_accessory", options: { displayName: "Hand accessory", fitWith:"Hand_accessory_top", } },
       { name: "Top_back", options: { bypassDNA: true, ignore: true } },
       { name: "Body", options: { unlisted: true } },
+      { name: "Belly" },
       { name: "Body_overlay", options: { displayName: "Body overlay" } },
       { name: "Legs" },
       { name: "Thighs" },
@@ -46,8 +46,6 @@ const layerConfigurations = [
       { name: "Facial_feature", options: { displayName: "Facial feature", fitWith:"Facial_feature_top" } },
       { name: "Mouth" },
       { name: "Eyes" },
-      /* { name: "Eye_cover_glass", options: { bypassDNA: true, ignore: true, opacity: 0.65 } },
-      { name: "Eye_cover", options: { displayName: "Eye cover" } }, */
       { name: "Facial_feature_top", options: { bypassDNA: true, ignore: true, fitWith:"Facial_feature_top_2" } },
       { name: "Hair", options: { fitWith:"Hair_back", } }, // [Hair_back] will try to be matched with an element by the same name as the selected element in [Hair]
       { name: "Facial_feature_top_2", options: { bypassDNA: true, ignore: true } },
@@ -58,8 +56,10 @@ const layerConfigurations = [
     ],
 
     specialEditions:[
+      // This lets you create special generations at specific ids, useful for hand crafted rare ones
+      //
       // Special version 0 femboy
-      {
+      /* {
         id:1,
         traits:{
           "Hand accessory":"Hand_accessory_1_Knowledge",
@@ -70,33 +70,27 @@ const layerConfigurations = [
           "Eyes":"Eyes_2_Purple",
           "Hair":"Hair_HAIR1_BLONDE_NORMAL_EAR_Magma blonde",
         }
-      },
-      // Cute Jules femboy
-      {
-        id:2,
-        traits:{
-          "Back":"Back_1_Brown cat tail#0",
-          "Body":"Body_1_Cream",
-          "Legs":"Legs_L_BLACK_1_Thigh highs black",
-          "Bottom":"Bottom_S_BLUE_17_Serafuku skirt#5",
-          "Neck accessory":"Neck_accessory_5_Collar",
-          "Top":"Top_S_WHITE_20_Serafuku#5",
-          "Facial feature":"Ff_10_SPECIAL_Glasses#0",
-          "Mouth":"Mouth_1",
-          "Eyes":"Eyes_1_Brown big#0",
-          "Hair":"Hair_HAIR8_BROWN_NORMAL_NOEAR_Ruffle brown eared#5"
-        }
-      }
+      }, */
     ],
 
+    // These are needed if you intend to use 'disableSameColor', tagging traits with colors seems like a decent practice in general
     colorTags:["WHITE","GRAY","BLACK",
-      "RED","ORANGE","YELLOW",
+      "RED","ORANGE","YELLOW","BLONDE",
       "LIME","OLIVE","GREEN", 
-      "TURQ","CYAN","BLUE","DENIM",
+      "TURQ","TEAL","CYAN","BLUE","DENIM",
       "PURPLE","PINK"],
 
+    // This is a really long bit that dictates how generation conditions
     generationConditions: [
+
+
+
+
+
+
       // HAIR -> HAIRCLIP
+      // Hairclips are fitted manually to every hair style
+      // disableSameColor makes sure that hairclips that would be hard to see on a hair color would be excluded
       {
         layer: "Hair", tags: [["HAIR1"]],
         forceTags: [{layer:"Hairclip",tags:[["HAIR1"]],disableSameColor:true}]},
@@ -161,10 +155,13 @@ const layerConfigurations = [
 
         
       // HAIR -> EARRING
+      // Hairs without ears shouldn't have earrings
       {
         layer: "Hair", tags: [["NOEAR"]],
         blockLayers: ["Earring"],
       },
+      // 1 hairstyle has very little ear room, it only has small earrings
+      // none is excluded because the small earrings are a much smaller pool
       {
         layer: "Hair", tags: [["EARSM"]],
         forceTags: [{
@@ -182,18 +179,19 @@ const layerConfigurations = [
           disableSameColor:true
         }]
       },
-      // Special case, loop looks weird with hair 3
+      // Special case, loops looks weird with hair 3
       {
         layer: "Hair", tags: [["HAIR3"]],
         forceTags: [{
           layer:"Earring",
-          tags:[["BIG","SMALL"],["-Loop"]],
+          tags:[["BIG","SMALL"],["-Loop"],["-Loop square"]],
           disableSameColor:true
         }]
       },
 
 
       // HAIR -> FACIAL FEATURE
+      // Partially face covering hairs on LEFT shouldn't have LEFT facial features, specifically it's 1 bandage
       {
         layer: "Hair", tags: [["COVERL"]],
         forceTags: [{
@@ -203,15 +201,54 @@ const layerConfigurations = [
       },
       
 
+
+
+
+      // GENERAL OUTFIT CONDITIONS
       // LONG
+      // Long outfits have bottoms disabled, things like dresses and overalls
       {
         layer: "Top", tags: [["LONG"]],
         blockLayers: ["Bottom"],
       },
       // PANT
+      // Pants have thigh highs and thigh accessories disabled
       {
         layer: "Bottom", tags: [["PANT"]],
         blockLayers: ["Legs", "Thighs"],
+      },
+
+
+
+
+
+      ////
+      // MISC CONDITIONS
+      ////
+
+      ////
+      // Special full robo body shouldn't have belly piercings or facial features
+      {
+        layer: "Body", traits: ["Body_CYBORG_5_Robo#1", "Body_CYBORG_5_Robo 2#1"],
+        blockLayers: ["Belly"],
+      },
+      // General cyborg bodies shouldn't have body overlays (most are bandages or other cyber parts, silly) and cyber eyes
+      // Cyber eyes are listed manually but I should've tagged them
+      {
+        layer: "Body", tags: [["CYBORG"]],
+        blockLayers: ["Body overlay", "Facial feature"],
+        forceTags: [{
+          layer:"Eyes",
+          tags:[["-Cyber green"],["-Cyber red"]]
+        },
+        {
+          layer:"Neck accessory",
+          tags:[["-Bandages"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["-Adhesive bandage"],["-Bandaged leg"]]
+        }]
       },
       // Cyber neck overlays block neck accessories
       {
@@ -219,43 +256,51 @@ const layerConfigurations = [
         blockLayers: ["Neck accessory"],
       },
       // DISABLE THIGHS WITH COLORED LEGS
+      // Thigh accessories (THIGH slot) should only appear on GRAY and BLACKT legs, the solution is either disable on every other color... or mark all the thigh accessories with #0
       {
-        layer: "Legs", tags: [["PINK","WHITE"]],
+        layer: "Legs", tags: [["PINK","WHITE","BLACK","RED","GREEN"]],
         blockLayers: ["Thighs"],
+      },
+      // If bottoms are too high and block belly, block belly trait
+      {
+        layer: "Bottom", tags: [["H","S","SPECIAL"]],
+        blockLayers: ["Belly"],
+      },
+      // If top doesn't reveal tummy, block belly trait
+      {
+        layer: "Top", tags: [["-TUM"]],
+        blockLayers: ["Belly"],
       },
 
+
+
+
+
+      
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      ////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////// CLOTHING
+      ////////////////////////////////////////////////////////////////
+
+      ////////////////////////////////////////////
+      ////////////////////////////////////////// MOSTLY TOPS
+      ////////////////////////////////////////////
+
+      ////
       // SPECIALS
-      // BUNNY SUITS
+      ////
+
+      ////
+      // MAID DRESSES
+      ////
       {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_BLACK_24_Combat bunny suit#2"],
-        blockLayers: ["Thighs"],
-      },
-      {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_BLACK_23_Bunny suit", "Top_SPECIAL_LONG_BLACK_23_Bunny suit 2 part#2","Top_SPECIAL_LONG_BLACK_24_Combat bunny suit#2"],
-        forceTags: [{
-          layer:"Legs",
-          //excludeNone:true, // this will disable weighted none possibilities
-          tags:[["HT","H","L"],["BLACK","BLACKT"]]
-        }]
-      },
-      {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_CYAN_23_Bunny suit cyan#2"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["HT","H","L"],["BLACK","BLACKT"]]
-        }]
-      },
-      // DOLL DRESS
-      {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_25_Doll dress#4"],
-        forceTraits: [{
-          layer:"Legs",
-          traits:["Legs_T_BLACKT_14_Light tights","Legs_T_BLACKT_5_Tights","Legs_L_GRAY_4_Kitty","Legs_L_GRAY_1_Thigh highs","Legs_L_GRAY_1_Thigh highs stripes#5"]
-        }]
-      },
-      // MAID OUTFITS
-      {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress"],
+        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress","Top_SPECIAL_LONG_26_Combat maid#5"],
         forceTags: [{
           layer:"Legs",
           excludeNone:true,
@@ -263,186 +308,84 @@ const layerConfigurations = [
         }]
       },
       {
-        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress pink#4"],
+        layer: "Top", traits: ["Top_SPECIAL_LONG_26_Maid dress pink#5"],
         forceTags: [{
           layer:"Legs",
           excludeNone:true,
           tags:[["WHITE","PINK"]]
         }]
       },
-      // OVERALLS
+
+      ////
+      // DOLL DRESS
+      ////
       {
-        layer: "Top", traits: ["TOP_SPECIAL_DENIM_LONG_Overalls#1"],
-        forceTags: [{
+        layer: "Top", traits: ["Top_SPECIAL_LONG_25_Doll dress#5"],
+        forceTraits: [{
           layer:"Legs",
-          tags:[["L"],["GRAY"]]
+          traits:["Legs_T_BLACKT_14_Light tights","Legs_T_BLACKT_5_Tights","Legs_L_GRAY_4_Kitty","Legs_L_GRAY_1_Thigh highs","Legs_L_GRAY_1_Thigh highs stripes#5"]
         }]
       },
-      // DANCE TOPS
+
+      ////
+      // BUNNY SUITS
+      ////
+      // This suit clashes with the thigh slot a little
       {
-        layer: "Top", traits: ["Top_SPECIAL_Dance top 1#2","Top_SPECIAL_Dance top 2#1"],
+        layer: "Top", traits: ["Top_SPECIAL_LONG_BLACK_24_Combat bunny suit#4"],
+        blockLayers: ["Thighs"],
+      },
+      {
+        layer: "Top", traits: ["Top_SPECIAL_LONG_BLACK_23_Bunny suit", "Top_SPECIAL_LONG_BLACK_23_Bunny suit 2 part#4","Top_SPECIAL_LONG_BLACK_24_Combat bunny suit#4","Top_SPECIAL_LONG_CYAN_23_Bunny suit cyan#4"],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["HT","H","L"],["BLACK","BLACKT"]]
+        }]
+      },
+
+      ////
+      // DANCE TOPS
+      ////
+      {
+        layer: "Top", traits: ["Top_SPECIAL_Dance top 2#3","Top_SPECIAL_Dance top 1#3"],
+        blockLayers: ["Thighs","Legs"],
         forceTraits: [{
           layer:"Bottom",
           traits:["Bottom_SPECIAL_Dance suit#0","Bottom_SPECIAL_Dance suit 2#0"]
         }]
       },
-      // MODERN TOP
-      {
-        layer: "Top", traits: ["Top_SPECIAL_BLACK_36_Modern jacket#1"],
-        forceTraits: [{
-          layer:"Bottom",
-          traits:["Bottom_H_CAS_BLACK_PANT_23_Jeans black#5","Bottom_H_SPECIAL_BLACK_7_High skirt black","Bottom_H_SPECIAL_BLACK_PANT_24_Tight pants black"]
-        }]
-      },
-      {
-        layer: "Bottom", traits: ["Bottom_H_SPECIAL_BLACK_7_High skirt black"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L","T"],["BLACK","BLACKT"]]
-        }],
-      },
 
-
-      // SCHOOL
-      // SCHOOL GYM TOPS
+      ////
+      // MODERN JACKET
+      ////
       {
-        layer: "Top", traits: ["Top_SG_BLUE_14_Gym uniform#5","Top_SG_BLUE_15_Short gym uniform#5"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SG"],["BLUE"]]
-        }],
-      },
-      {
-        layer: "Top", traits: ["Top_SG_RED_15_Gym uniform 2#5","Top_SG_RED_15_Short gym uniform 2#5"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SG"],["RED"]]
-        }],
-      },
-      // SCHOOL GYM BOTTOMS
-      {
-        layer: "Bottom", traits: ["Bottom_SG_BLUE_12_Gym bloomers","Bottom_SG_BLUE_21_Gym retro shorts"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L"],["BLUE","BLACK","WHITE"]]
-        }],
-      },
-      {
-        layer: "Bottom", traits: ["Bottom_SG_RED_13_Gym bloomers 2","Bottom_SG_RED_21_Gym retro shorts 2"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L"],["RED","BLACK","WHITE"]]
-        }],
-      },
-      // SCHOOL TOPS
-      {
-        layer: "Top", traits: ["Top_S_WHITE_20_Serafuku#5","Top_S_WHITE_20_Serafuku leader#2","Top_S_YELLOW_21_Serafuku sweater#5"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["S"],["BLUE"]]
-        }],
-      },
-      {
-        layer: "Top", traits: ["Top_S_BLACK_20_Serafuku 2#5","Top_S_BLACK_20_Serafuku leader 2#2","Top_S_BLACK_21_Serafuku sweater 2#5"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["S"],["RED"]]
-        }],
-      },
-      {
-        layer: "Top", traits: ["Top_S2_WHITE_26_School top","Top_S2_BLACK_27_School top sweater","Top_S2_BLACK_26_School coat"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["S"],["BLACK","BLUE"]]
-        }],
-      },
-      {
-        layer: "Top", traits: ["Top_S2_YELLOW_26_Suspicious school coat#3"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["S"],["YELLOW"]]
-        }],
-      },
-      // SCHOOL BOTTOMS
-      {
-        layer: "Bottom", traits: ["Bottom_S_BLUE_17_Serafuku skirt#5","Bottom_S_BLACK_17_Serafuku skirt short#5"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L","H","T"],["BLUE","BLACK","WHITE","BLACKT"]]
-        }],
-      },
-      {
-        layer: "Bottom", traits: ["Bottom_S_RED_17_Serafuku skirt 2#5","Bottom_S_BLACK_17_Serafuku skirt 2 short#5"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L","H","T"],["RED","BLACK","WHITE","BLACKT"]]
-        }],
-      },
-      {
-        layer: "Bottom", traits: ["Bottom_S_BLACK_17_Serafuku skirt 3#5","Bottom_S_BLACK_17_Serafuku skirt 3 short#5"],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["L","H","T"],["BLACK","WHITE","BLACKT"]]
-        }],
-      },
-      {
-        layer: "Bottom", traits: ["Bottom_S_YELLOW_17_Suspicious serafuku skirt"],
+        layer: "Top", traits: ["Top_SPECIAL_BLACK_36_Modern jacket#4"],
         forceTraits: [{
-          layer:"Legs",
-          traits:["Legs_L_BLACK_7_Socks black","Legs_L_BLACK_1_Thigh highs black"]
-        }],
-      },
-
-      // OFFICE
-      // OFFICE TOPS
-      {
-        layer: "Top", tags: [["O"],["WHITE"],["-LONG"]],
-        forceTags: [{
           layer:"Bottom",
-          tags:[["O"],["GRAY","RED"]]
-        }]
-      },
-      {
-        layer: "Top", traits: ["Top_O_GRAY_19_Business"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["O"],["GRAY"]]
-        }]
-      },
-      {
-        layer: "Top", traits: ["Top_O_RED_19_Business red#2"],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["O"],["RED"]]
-        }]
-      },
-      // OFFICE SWEATERS
-      {
-        layer: "Top", tags: [["LONG"],["O"]],
-        forceTraits: [{
-          layer:"Legs",
-          traits:["Legs_H_GRAY_1_Thigh highs strapped"]
-        }],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["BLACKT"],["H","T"]]
-        }]
-      },
-      // OFFICE BOTTOMS
-      {
-        layer: "Bottom", tags: [["O"]],
-        forceTraits: [{
-          layer:"Legs",
-          traits:["Legs_H_GRAY_1_Thigh highs strapped"]
-        }],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["BLACKT"],["H","T"]]
+          traits:["Bottom_H_SPECIAL_BLACK_7_High skirt black","Bottom_H_SPECIAL_BLACK_PANT_24_Tight pants black","Bottom_H_CAS_BLACK_PANT_23_Jeans black#5"]
         }]
       },
 
-      // SECURITY
-      // SECURITY TOPS
+      ////
+      // OVERALLS
+      ////
+      {
+        layer: "Top", traits: ["Top_SPECIAL_DENIM_LONG_Overalls#4"],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L"],["GRAY"]]
+        }]
+      },
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      // SEC & CYB
+      ////
+      // SEC tops go with pretty much anything H or similarly high, the juxtaposition with brighter colors is funny
       {
         layer: "Top", tags: [["SEC"]],
         forceTags: [{
@@ -450,9 +393,7 @@ const layerConfigurations = [
           tags:[["SP","CAS","S","O","CYB"],["GRAY","DENIM","BLUE","RED","PINK"],["H","S","O","CYB"]]
         }]
       },
-      
-      // CYBER
-      // CYBER TOPS
+      // CYB tops are pretty much the same, they look a bit awkward with office and school bottoms though
       {
         layer: "Top", tags: [["CYB"]],
         forceTags: [{
@@ -461,157 +402,495 @@ const layerConfigurations = [
         }]
       },
 
-      // CYBER BOTTOMS
+      ////
+      // OFFICE TOPS
+      ////
+      // White office tops work with gray/red office bottoms
       {
-        layer: "Bottom", tags: [["CYB"]],
+        layer: "Top", tags: [["O"],["WHITE"],["-LONG"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["O"],["GRAY","RED"]]
+        }]
+      },
+      // Gray tops work only with gray bottoms
+      {
+        layer: "Top", tags: [["O"],["GRAY"],["-LONG"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["O"],["GRAY"]]
+        }]
+      },
+      // Red tops work only with red bottoms
+      {
+        layer: "Top", tags: [["O"],["RED"],["-LONG"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["O"],["RED"]]
+        }]
+      },
+      // OFFICE SWEATERS
+      // Office sweaters go with a specific gray bottom (it looks less casual than the rest) and transparent black thigh highs and tights
+      {
+        layer: "Top", tags: [["LONG"],["O"]],
+        forceTraits: [{
+          layer:"Legs",
+          traits:["Legs_H_GRAY_1_Long thigh highs strapped"]
+        }],
         forceTags: [{
           layer:"Legs",
-          tags:[["BLACKT","GRAY"],["L","H","T"]]
+          tags:[["BLACKT"],["H","T"]]
         }]
       },
 
-      // SPORT
-      // SPORT TOPS
+      ////
+      // MODERN SCHOOL TOPS [S2]
+      ////
+      // White or black tops go with black or blue school skirts
       {
-        layer: "Top", tags: [["SP"],["H"],["WHITE","PINK"]],
+        layer: "Top", tags: [["S2"],["WHITE","BLACK"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["S"],["BLACK","BLUE"]]
+        }],
+      },
+      // This is the tomoko outfit, it goes only with the special yellow school skirt
+      {
+        layer: "Top", tags: [["S2"],["YELLOW"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["S"],["YELLOW"]]
+        }],
+      },
+
+      //// 
+      // TRADITIONAL SCHOOL TOPS [S]
+      ////
+      // White and yellow tops are blue uniforms (confusing) they use blue bottoms
+      {
+        layer: "Top", tags: [["S"],["WHITE","YELLOW"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["S"],["BLUE"]]
+        }],
+      },
+      // Black tops are red uniforms, red bottoms
+      {
+        layer: "Top", tags: [["S"],["BLACK"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["S"],["RED"]]
+        }],
+      },
+
+      //// 
+      // SCHOOL GYM OUTFITS [SG]
+      ////
+      {
+        layer: "Top", tags:[["SG"],["BLUE"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SG"],["BLUE"]]
+        }],
+      },
+      {
+        layer: "Top", tags:[["SG"],["RED"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SG"],["RED"]]
+        }],
+      },
+
+      ////
+      // SPORTS TOPS [SP]
+      ////
+      // Sports tops go with their height, and SP/CAS
+      {
+        layer: "Top", tags: [["SP"],["H"]],
         forceTags: [{
           layer:"Bottom",
           tags:[["SP","CAS"],["H"]]
-        }],
-        forceTraits: [{
-          layer:"Bottom",
-          traits:["Bottom_L_CAS_DENIM_4_Denim"]
-        }],
+        }]
       },
+      ////
       {
-        layer: "Top", tags: [["SP"],["H"],["PURPLE","GRAY"]],
+        layer: "Top", tags: [["SP"],["L"]],
         forceTags: [{
           layer:"Bottom",
-          tags:[["SP","CAS"],["H"],["GRAY","DENIM","BLUE"]]
-        }],
-        forceTraits: [{
+          tags:[["SP","CAS"]]//,["L"]]
+        }]
+      },
+      // These don't specify L or H becasue the above 2 conditions already do, SP/CAS aren't necessary here either but it's clearer this way
+      {
+        layer: "Top", tags: [["SP"],["PURPLE","GRAY","RED","BLUE"]],
+        forceTags: [{
           layer:"Bottom",
-          traits:["Bottom_L_CAS_DENIM_4_Denim"]
+          tags:[["SP","CAS"],["GRAY","DENIM","BLUE"]]
         }],
       },
       {
-        layer: "Top", tags: [["SP"],["L"],["WHITE","PINK"]],
+        layer: "Top", tags: [["SP"],["WHITE","PINK"]],
         forceTags: [{
           layer:"Bottom",
           tags:[["SP","CAS"]]
         }]
       },
+      // Specific bottoms for a few tops that have a unique shade of pink and look bad with gray things
       {
-        layer: "Top", tags: [["SP"],["L"],["PURPLE","GRAY"]],
+        layer: "Top", traits: ["Top_H_TUM_SP_PINK_12_Cropped hoodie pink", "Top_H_TUM_SP_PINK_10_Pink croptop"],
         forceTags: [{
           layer:"Bottom",
-          tags:[["SP","CAS"],["GRAY","DENIM","BLUE"]]
-        }]
-      },
-      // SPORT BOTTOMS
-      {
-        layer: "Bottom", tags: [["SP"],["WHITE","PINK","GREEN"]],
-        forceTags: [{
+          tags:[["SP","CAS"],["WHITE","PINK"]]
+        },
+        {
           layer:"Legs",
-          tags:[["WHITE","PINK","BLACKT"],["L","H","T"]]
-        }]
-      },
+          tags:[["WHITE","PINK"]]
+        }],
+      },     
       {
-        layer: "Bottom", tags: [["SP"],["PURPLE","BLUE","CYAN","OLIVE","RED"]],
+        layer: "Top", traits: ["Top_H_TUM_SP_WHITE_10_White croptop","Top_H_TUM_SP_WHITE_12_Cropped hoodie"],
         forceTags: [{
-          layer:"Legs",
-          tags:[["BLACKT","GRAY"],["L","H","T"]]
-        }]
-      },
-      {
-        layer: "Bottom", tags: [["SP"],["GRAY"]],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["BLACKT","GRAY","WHITE"],["L","H","T"]]
+          layer:"Bottom",
+          tags:[["-Leggings alternative pink"]]
         }]
       },
 
-      // CASUAL
+      ////
       // CASUAL TOPS
+      ////
+      // CASUAL LONG TOPS
+      ////
       {
-        layer: "Top", tags: [["CAS"],["H"],["WHITE","PINK","GREEN","GRAY"]],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SP","CAS","CYB"],["H"]]
-        }],
-      },
-      {
-        layer: "Top", tags: [["CAS"],["H"],["PURPLE","BLUE","DENIM","CYAN","OLIVE","RED"]],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SP","CAS","S","CYB"],["H"],["PURPLE","GRAY","BLUE","DENIM","CYAN","OLIVE","RED"]]
-        }],
-      },
-      {
-        layer: "Top", tags: [["CAS"],["L"],["WHITE","PINK","GREEN","GRAY"]],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SP","CAS","CYB"]]
-        }]
-      },
-      {
-        layer: "Top", tags: [["CAS"],["L"],["PURPLE","BLUE","DENIM","CYAN","OLIVE","RED"]],
-        forceTags: [{
-          layer:"Bottom",
-          tags:[["SP","CAS","S","CYB"],["PURPLE","GRAY","BLUE","DENIM","CYAN","OLIVE","RED"]]
-        }]
-      },
-      // CASUAL BOTTOMS
-      {
-        layer: "Bottom", tags: [["CAS"],["WHITE","PINK","GREEN"]],
+        layer: "Top", tags: [["CAS"],["LONG"],["DENIM"]],
         forceTags: [{
           layer:"Legs",
-          tags:[["WHITE","PINK","BLACKT"],["L","H","T"]]
+          tags:[["WHITE","PINK","BLACKT"],["L","T"]]
         }]
       },
       {
-        layer: "Bottom", tags: [["CAS"],["PURPLE","BLUE","CYAN","OLIVE","RED"]],
+        layer: "Top", tags: [["CAS"],["LONG"],["GRAY"]],
         forceTags: [{
           layer:"Legs",
-          tags:[["BLACKT","GRAY"],["L","H","T"]]
+          tags:[["GRAYPINK","GRAY","BLACKT"],["L","T"]]
         }]
       },
       {
-        layer: "Bottom", tags: [["CAS"],["GRAY"]],
+        layer: "Top", tags: [["CAS"],["LONG"],["PINK"]],
         forceTags: [{
           layer:"Legs",
-          tags:[["BLACKT","GRAY","WHITE"],["L","H","T"]]
-        }]
-      },
-      {
-        layer: "Bottom", tags: [["CAS"],["DENIM"]],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["BLACKT","GRAY","RED","BLUE","WHITE","PINK"],["L","H","T"]]
-        }]
-      },
-      // CASUAL LONGS
-      {
-        layer: "Top", tags: [["CAS"],["LONG"],["PINK","WHITE","YELLOW","GREEN","GRAY"]],
-        forceTags: [{
-          layer:"Legs",
-          tags:[["WHITE","PINK","BLACKT"],["L","H","T"]]
+          tags:[["WHITE","PINK","BLACKT"],["L","T"]]
         }]
       },
       {
         layer: "Top", tags: [["CAS"],["LONG"],["BLACK"]],
         forceTags: [{
           layer:"Legs",
-          tags:[["BLACKT","BLACK"],["L","H","T"]]
+          tags:[["BLACKPINK","BLACKT"],["L","H","T"]]
         }]
       },
-      /* {
-        layer: "Top", tags: [["CAS"],["LONG"],["PURPLE","BLUE","CYAN","OLIVE","RED"]],
+      ////
+      // CASUAL NORMAL TOPS
+      ////
+      {
+        layer: "Top", tags: [["CAS"],["H"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["H"]]
+        }]
+      },
+      ////
+      {
+        layer: "Top", tags: [["CAS"],["L"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["L","CAS"]] // This means SP has to be L, and CAS can be either H/L
+        }]
+      },
+      ////
+      // CASUAL NORMAL TOPS IN DEPTH
+      ////
+      {
+        layer: "Top", tags: [["CAS"],["WHITE"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","WHITE","DENIM","PINK","RED","BLUE","GREEN","CYAN"]]
+        },
+        // Added color restrictions to legs
+        {
+          layer:"Legs",
+          tags:[["GRAY","WHITE","PINK"]]
+        }],
+      },
+      {
+        layer: "Top", tags: [["CAS"],["GRAY"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","DENIM","RED","BLUE"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK","BLACKT","RED","BLUE"]]
+        }],
+      },
+      {
+        layer: "Top", tags: [["CAS"],["RED","PURPLE","BLUE"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","DENIM","RED","BLUE","BLACK"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK","BLACKT","PURPLE","BLUE","BLACK"]]
+        }],
+      },
+      {
+        layer: "Top", tags: [["CAS"],["OLIVE"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","DENIM","RED","BLUE"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK","BLACKT","RED","BLUE"]]
+        }],
+      },
+      {
+        layer: "Top", tags: [["CAS"],["PINK"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","DENIM","WHITE","PINK"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["WHITE","PINK","GRAYPINK","GRAY","BLACKT"]]
+        }],
+      },
+      {
+        layer: "Top", tags: [["CAS"],["CYAN","GREEN"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["GRAY","DENIM","WHITE","BLACK","GREEN"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["WHITE","PINK","GRAYPINK","GRAY","BLACKT","GREEN","RED"]]
+        }],
+      },
+      // Specific bottoms for a few tops that have a unique shade of pink and look bad with gray things
+      {
+        layer: "Top", traits: ["Top_L_CAS_PINK_13_Rainbow sweater#6"],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["SP","CAS"],["PINK"]]
+        },
+        {
+          layer:"Legs",
+          tags:[["PINK"]]
+        }],
+      },
+      // Specific rules for sundresses
+      {
+        layer: "Top", traits: ["Top_CAS_PINK_LONG_9_Pink sundress#5","Top_CAS_YELLOW_LONG_9_Sundress#5"],
         forceTags: [{
           layer:"Legs",
-          tags:[["BLACKT","GRAY","RED"],["L","H","T"]]
+          tags:[["WHITE","BLACKT","PINK"]]
+        }],
+      },
+      {
+        layer: "Top", traits: ["Top_CAS_BLACK_LONG_9_Black sundress#5"],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["BLACK","BLACKT"]]
+        }],
+      },
+
+
+
+
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          //////          //////          //////          //////          //////          //////          //////          //////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      ////////////////////////////////////////////
+      ////////////////////////////////////////// BOTTOMS
+      ////////////////////////////////////////////
+
+      ////
+      // SPECIAL BOTTOMS
+      ////
+      {
+        layer: "Bottom", traits: ["Bottom_H_SPECIAL_BLACK_7_High skirt black"],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","T"],["BLACK","BLACKT"]]
+        }],
+      },
+
+      ////
+      // These server as additional rules, tops can dictate leg slot rules, but if missing these are more generalized rules
+      ////
+      // CYBER BOTTOMS
+      // CYB bottoms are all gray, they fit with grays and transparent blacks
+      {
+        layer: "Bottom", tags: [["CYB"],["GRAY"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["BLACKT","GRAY"],["L","T"]]
+        }]
+      },
+
+      ////
+      // OFFICE BOTTOMS
+      ////
+      {
+        layer: "Bottom", tags: [["O"]],
+        forceTraits: [{
+          layer:"Legs",
+          traits:["Legs_H_GRAY_1_Long thigh highs strapped"]
+        }],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["BLACKT"],["H","T"]]
+        }]
+      },
+
+      ////
+      // SCHOOL BOTTOMS
+      // UNSORTED [S],[S2]
+      ////
+      {
+        layer: "Bottom", tags: [["S"],["BLUE"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"],["BLUE","BLACK","WHITE","BLACKT"]]
+        }],
+      },
+      {
+        layer: "Bottom", tags: [["S"],["RED"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"],["RED","BLACK","WHITE","BLACKT"]]
+        }],
+      },
+      {
+        layer: "Bottom", tags: [["S"],["BLACK"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"],["BLACK","WHITE","BLACKT"]]
+        }],
+      },
+      // Yellow bottoms specific
+      {
+        layer: "Bottom", tags: [["S"],["YELLOW"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"],["WHITE"]]
+        }],
+        forceTraits: [{
+          layer:"Legs",
+          traits:["Legs_L_BLACK_7_Socks black","Legs_L_BLACK_1_Thigh highs black"]
+        }],
+      },
+
+      ////
+      // SCHOOL GYM BOTTOMS
+      ////
+      {
+        layer: "Bottom", tags:[["SG"],["BLUE"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L"],["BLUE","BLACK","WHITE"]]
+        }],
+      },
+      {
+        layer: "Bottom", tags:[["SG"],["RED"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L"],["RED","BLACK","WHITE"]]
+        }],
+      },
+
+      ////
+      // SPORTS BOTTOMS
+      ////
+      {
+        layer: "Bottom", tags: [["SP"],["WHITE","PINK","GREEN"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["WHITE","PINK","GRAYPINK"],["L","H","T"]]
+        }]
+      },
+      /* { // This doesn't apply to anything
+        layer: "Bottom", tags: [["SP"],["PURPLE","BLUE","CYAN","OLIVE","RED"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK"],["L","H","T"]]
         }]
       }, */
+      {
+        layer: "Bottom", tags: [["SP"],["GREEN"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["WHITE","GREEN","RED","BLACK"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["SP"],["GRAY"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["GRAY","WHITE","GRAYPINK","RED","BLUE","BLACKT"],["L","H","T"]]
+        }]
+      },
+
+      ////
+      // CASUAL BOTTOMS
+      ////
+      {
+        layer: "Bottom", tags: [["CAS"],["H"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["CAS"],["L"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["CAS"],["GRAY"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK","BLACKT","RED","BLUE"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["CAS"],["DENIM"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["GRAY","GRAYPINK","BLACKT","PINK","WHITE","RED","BLUE"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["CAS"],["PINK"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["WHITE","BLACKT","PINK","GRAYPINK"]]
+        }]
+      },
+      {
+        layer: "Bottom", tags: [["CAS"],["GREEN"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["WHITE","GREEN","RED","BLACK"]]
+        }]
+      },
+
   ],
   },
 ];

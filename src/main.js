@@ -18,6 +18,7 @@ const {
 	rarityDelimiter,
 	shuffleLayerConfigurations,
 	debugLogs,
+	rngSeed,
 	traitOutline,
 	extraMetadata,
 	text,
@@ -390,10 +391,11 @@ const createDna = (_layerConfiguration, _layers, _editionNum) => {
 	}
 
 	if(!specialEditionCreated) {
+		let localRandom = rngSeed ? help.newPrngStream(rngSeed + _editionNum) : null;
 		// Go over every layer and pick a random element
 		for (let i = 0; i < _layers.length; i++) {
 			let layer = _layers[i];
-			let element = help.pickElementFromWeightedLayer(layer);
+			let element = help.pickElementFromWeightedLayer(layer, localRandom);
 
 			// if ignore is flagged pick the none element, every folder should have a transparent none element
 			if (layer.ignore) {
@@ -563,7 +565,7 @@ const createDna = (_layerConfiguration, _layers, _editionNum) => {
 						}
 
 						if(!repickedItemAlreadyPicked) {
-							let newElementName = help.pickElementFromWeightedLayer(fakeLayer);
+							let newElementName = help.pickElementFromWeightedLayer(fakeLayer, localRandom);
 							let newElement = getNamedElement(layerElement.layer, newElementName.name);
 							layerElement.element = newElement;
 							repickedSomething = true;

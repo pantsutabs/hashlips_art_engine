@@ -105,18 +105,15 @@ module.exports = {
     arrayUnique: function (arr) {
         return arr.filter((v, i, a) => a.indexOf(v) === i);
     },
-    pickElementFromWeightedLayer: function (layer) {
+    pickElementFromWeightedLayer: function (layer, rng) {
+        let localRandom = rng ? rng.random : random;
         let totalWeight = 0;
         layer.elements.forEach((element) => {
             totalWeight += element.weight;
         });
-
-        /* if(layer.name=="Legs") {
-            console.log(" - picking from:", layer.name, "elements:", layer.elements.reduce((previousValue, currentValue) => (previousValue.name ? previousValue.name : previousValue) + "," + currentValue.name))
-        } */
         
         // number between 0 - totalWeight
-        let rand = Math.floor(random() * totalWeight);
+        let rand = Math.floor(localRandom() * totalWeight);
         for (var i = 0; i < layer.elements.length; i++) {
             // subtract the current weight from the random weight until we reach a sub zero value.
             rand -= layer.elements[i].weight;
