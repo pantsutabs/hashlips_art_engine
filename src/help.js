@@ -30,7 +30,7 @@ function newPrngStream (seed) {
         random: function () {
             if(seed) {
                 rngIteration++;
-                return prngWrapper(seed + rngIteration);
+                return prngWrapper(seed + "-" + rngIteration);
             }
             else {
                 return Math.random();

@@ -21,7 +21,7 @@ const solanaMetadata = {
   ],
 };
 
-const rngSeed = null;//"FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
+const rngSeed = "TESTING ROLLS: FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
 
 const traitOutline = false;
 
