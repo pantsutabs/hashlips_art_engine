@@ -19,7 +19,7 @@ const {
 	gif,
 } = require(`${basePath}/src/config.js`);
 
-const getRandom = help.newPrngStream(null).random; // TODO: help.newPrngStream(rngSeed).random;
+let getRandom = null;
 
 const addText = (_ctx,_sig, x, y, size) => {
 	_ctx.fillStyle = text.color;
@@ -421,7 +421,7 @@ const genBackground2 = (ctx, scheme) => {
 
 		// Third color
 		v2arr = [];
-		let thirdShapeSize = incrementBy/6;
+		let thirdShapeSize = incrementBy/12;
 		
 		v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
@@ -448,10 +448,10 @@ const genBackground3 = (ctx, scheme) => {
 	let start = {x: 0 -(diffNegStart), y: -(topDiff/2) -(diffNegStart)};
 	let end = {x:start.x + baseUnit*(16) +(diffNegStart*2), y:start.y+ Math.ceil(format.height/baseUnit)*baseUnit +(diffNegStart*2)};
 
-	let incrementByStart = baseUnit*(6 + Math.floor(getRandom()*5));
+	let incrementByStart = baseUnit*(8 + Math.floor(getRandom()*3));
 	let incrementBy = incrementByStart;
 	let w = (end.x-start.x)/(2 + Math.floor(getRandom()*6));
-	for(let j=start.y;j<end.y; j+=incrementBy) {
+	for(let j=start.y + incrementBy*0.65;j<end.y; j+=incrementBy) {
 		let y = j;
 		let x = start.x;
 		incrementBy = Math.max(incrementBy*0.85, incrementByStart*0.25);
@@ -477,7 +477,7 @@ const genBackground3 = (ctx, scheme) => {
 
 		// Third color
 		v2arr = [];
-		let thirdShapeSize = incrementBy/6;
+		let thirdShapeSize = incrementBy/12;
 		
 		v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
@@ -508,12 +508,36 @@ const genBackground4 = (ctx, scheme) => {
 	let incrementBy = incrementByStart;
 
 	for(let j=start.y, jc=0;j<end.y; j+=incrementBy, jc++) {
-		incrementBy = Math.max(incrementByStart/2, incrementBy*0.9);
+		incrementBy = Math.max(incrementByStart/2, incrementBy*0.95);
 		let w = incrementBy;
 		let w3 = incrementByStart;
 		let y = j;
 		for(let i=start.x + (jc%2==0 ? 0 : w/2);i<end.x; i+=w) {
 			if(getRandom() > 0.5 && getRandom() > (5-jc)/5) {
+
+				let x = i;
+
+				let v2arr = [];
+
+				let d1 = 16, d2=8;
+				let color = getRandom() > 0.5 ? scheme[1] : scheme[2];
+				v2arr = [];
+				v2arr.push({x:x + w3/d1, y:y + w3/d1});
+				v2arr.push({x:x + w3/d1 + (w-w3/d2), y:y + w3/d1});
+				drawShape(ctx, v2arr, color);
+				v2arr = [];
+				v2arr.push({x:x + w3/d1 + (w-w3/d2), y:y + w3/d1});
+				v2arr.push({x:x + w3/d1 + (w-w3/d2), y:y + w3/d1 + (incrementBy-w3/d2)});
+				drawShape(ctx, v2arr, color);
+				v2arr = [];
+				v2arr.push({x:x + w3/d1 + (w-w3/d2), y:y + w3/d1 + (incrementBy-w3/d2)});
+				v2arr.push({x:x + w3/d1, y:y + w3/d1 + (incrementBy-w3/d2)});
+				drawShape(ctx, v2arr, color);
+				v2arr = [];
+				v2arr.push({x:x + w3/d1, y:y + w3/d1 + (incrementBy-w3/d2)});
+				v2arr.push({x:x + w3/d1, y:y + w3/d1});
+				drawShape(ctx, v2arr, color);
+
 				continue;
 			}
 
@@ -528,13 +552,13 @@ const genBackground4 = (ctx, scheme) => {
 			v2arr.push({x:x + w3/d1, y:y + w3/d1 + (incrementBy-w3/d2)});
 
 			
-			let color = getRandom() > 0.5 && getRandom() > (5-jc)/5 || true ? scheme[1] : scheme[2];
+			let color = scheme[1];
 
 			drawShape(ctx, v2arr, color);
 		}
 	}
 	
-	if(true) {
+	/* if(true) {
 		incrementBy = incrementByStart;
 		for(let j=start.y, jc=0;j<end.y; j+=incrementBy, jc++) {
 			incrementBy = Math.max(incrementByStart/2, incrementBy*0.9);
@@ -558,7 +582,7 @@ const genBackground4 = (ctx, scheme) => {
 				}
 			}
 		}
-	}
+	} */
 	
 }
 
@@ -579,10 +603,11 @@ const genBackground5 = (ctx, scheme) => {
 			{
 				let v2arr = [];
 
-				v2arr.push({x:x+w/2, y:y    +w/4});
-				v2arr.push({x:x+w, y:y+w/2    +w/4});
-				v2arr.push({x:x+w/2, y:y+w    +w/4});
-				v2arr.push({x:x, y:y+w/2    +w/4});
+				let divw = w/6;
+				v2arr.push({x:x+w/2, y:y    +divw});
+				v2arr.push({x:x+w, y:y+w/2    +divw});
+				v2arr.push({x:x+w/2, y:y+w    +divw});
+				v2arr.push({x:x, y:y+w/2    +divw});
 
 				let color = scheme[2];
 
@@ -654,26 +679,98 @@ const genBackground6 = (ctx, scheme) => {
 	}
 }
 
-const generateCustomBackground = (layerConfiguration, layerElements, ctx) => {
+const genBackground7 = (ctx, scheme) => {
+	let newScheme;
+
+	let reversedScheme = [scheme[1], scheme[0], scheme[2]];
+
+	if(getRandom() > 0.5 ) {
+		newScheme = scheme;
+	}
+	else {
+		newScheme = reversedScheme;
+		ctx.fillStyle = newScheme[0];
+		ctx.fillRect(0, 0, format.width, format.height);
+	}
+
+	let randomNum = getRandom();
+	if(randomNum > 0.8) {
+		genBackground1(ctx,newScheme); // This is really cool
+		genBackground2(ctx,newScheme);
+		genBackground3(ctx,newScheme);
+		genBackground4(ctx,newScheme);
+		//genBackground5(ctx,newScheme);
+	}
+	else if(randomNum > 0.6) {
+		genBackground1(ctx,newScheme); // This is really cool
+		genBackground2(ctx,newScheme);
+		genBackground3(ctx,newScheme);
+		//genBackground4(ctx,newScheme);
+		genBackground5(ctx,newScheme);
+	}
+	else if(randomNum > 0.4) {
+		/* genBackground1(ctx,newScheme); // This is really cool
+		//genBackground2(ctx,scheme);
+		//genBackground3(ctx,scheme);
+		genBackground4(ctx,newScheme); */
+		genBackground6(ctx,reversedScheme);
+		genBackground1(ctx,reversedScheme);
+		genBackground1(ctx,reversedScheme);
+		genBackground1(ctx,reversedScheme);
+		genBackground2(ctx,scheme);
+		genBackground2(ctx,scheme);
+		genBackground2(ctx,reversedScheme);
+		genBackground3(ctx,scheme);
+		genBackground3(ctx,scheme);
+		genBackground3(ctx,reversedScheme);
+		//genBackground4(ctx,newScheme);
+		//genBackground3(ctx,newScheme);
+	}
+	else if(randomNum > 0.2) {
+		
+		genBackground6(ctx,newScheme);
+		genBackground4(ctx,newScheme);
+		genBackground5(ctx,newScheme);
+	}
+	else {
+		genBackground3(ctx,newScheme);
+		genBackground4(ctx,newScheme);
+	}
+}
+
+const generateCustomBackground = (layerConfiguration, layerElements, ctx, editionNum) => {
+	getRandom = rngSeed ? help.newPrngStream(rngSeed + editionNum).random : Math.random;
 	let {darkness, taggedColors} = generateColorMatchingData(layerElements);
 	let scheme = generateColorScheme3(taggedColors,darkness);
 	
     ctx.fillStyle = scheme[0];
 	ctx.fillRect(0, 0, format.width, format.height);
 
-	let bgs = [
+	/* let bgs = [
 		genBackground1, // linear lines // BAD
 		genBackground2, // arrow down // BAD
 		genBackground3, // zigzag // BAD
 		genBackground4, // floating squares // Need reimagining
 		genBackground5, // shaded squares // Great, could use more shapes
 		genBackground6, // big diamond // Need reimagining
+	]; */
+
+	let bgs = [
+		genBackground1, // linear lines // BAD
+		genBackground2, // arrow down // BAD
+		genBackground3, // zigzag // BAD
+		//genBackground4, // floating squares // Need reimagining
+		genBackground5, // shaded squares // Great, could use more shapes
+		//genBackground6, // big diamond // Need reimagining
+		genBackground7
 	];
 
-	//bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);
-	genBackground1(ctx,scheme);
+	bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);
+	// 4 is fucked, needs a lot less randomness
+	// 6 is not that good
+	//genBackground4(ctx,scheme);
 	//genBackground5(ctx,scheme);
-	
+	//genBackground7(ctx,scheme);
 
 	/* genBackground1(ctx,scheme); // This is really cool
 	genBackground2(ctx,scheme);

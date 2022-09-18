@@ -738,7 +738,7 @@ const startCreating = async () => {
 						hashlipsGiffer.start();
 					}
 					if (background.useCustomBackground) {
-						generateCustomBackground(layerConfigurations[layerConfigIndex], layerElements, ctx);
+						generateCustomBackground(layerConfigurations[layerConfigIndex], layerElements, ctx, abstractedIndexes[0]);
 					}
 					else if (background.generate) {
 						drawBackground();
@@ -767,6 +767,9 @@ const startCreating = async () => {
 						});
 					} */
 					/* else */ {
+
+
+						
 						// draws the traits normally
 						renderObjectArray.forEach((renderObject, index) => {
 							drawElement(
