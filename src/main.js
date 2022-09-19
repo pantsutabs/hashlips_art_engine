@@ -19,6 +19,7 @@ const {
 	shuffleLayerConfigurations,
 	debugLogs,
 	rngSeed,
+	dnaIsDumb,
 	traitOutline,
 	extraMetadata,
 	text,
@@ -715,7 +716,7 @@ const startCreating = async () => {
 
 		while (editionCount <= layerConfigurations[layerConfigIndex].growEditionSizeTo) {
 			let {newDna, layerElements} = createDna(layerConfigurations[layerConfigIndex], layers, abstractedIndexes[0]);
-			if (isDnaUnique(dnaList, newDna)) {
+			if (isDnaUnique(dnaList, newDna) || dnaIsDumb) {
 				let results = constructLayerToDna(newDna, layers);
 				let loadedElements = [];
 

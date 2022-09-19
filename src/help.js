@@ -108,17 +108,18 @@ module.exports = {
     pickElementFromWeightedLayer: function (layer, rng) {
         let localRandom = rng ? rng.random : random;
         let totalWeight = 0;
-        layer.elements.forEach((element) => {
+        let sortedElements = layer.elements.sort((a,b) => {return a.name.localeCompare(b.name);});
+        sortedElements.forEach((element) => {
             totalWeight += element.weight;
         });
         
         // number between 0 - totalWeight
         let rand = Math.floor(localRandom() * totalWeight);
-        for (var i = 0; i < layer.elements.length; i++) {
+        for (var i = 0; i < sortedElements.length; i++) {
             // subtract the current weight from the random weight until we reach a sub zero value.
-            rand -= layer.elements[i].weight;
+            rand -= sortedElements[i].weight;
             if (rand < 0) {
-                return layer.elements[i];
+                return sortedElements[i];
             }
         }
     },

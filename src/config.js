@@ -21,14 +21,17 @@ const solanaMetadata = {
   ],
 };
 
-const rngSeed = "TESTING ROLLS: FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
+const rngSeed = null;//"TESTING ROLLS: FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
+
+// This makes it so hashlips' minimum rarity check doesn't cause exceptions
+const dnaIsDumb = true;
 
 const traitOutline = false;
 
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 500,
+    growEditionSizeTo: 1344,
     layersOrder: [
       { name: "Hair_back", options: { bypassDNA: true, ignore: true } },
       { name: "Back" },
@@ -63,7 +66,7 @@ const layerConfigurations = [
         id:1,
         traits:{
           "Hand accessory":"Hand_accessory_1_Knowledge",
-          "Body":"Body_2_Caramel",
+          "Body":"Body_MEAT_2_Caramel#25",
           "Bottom":"Bottom_H_SP_GRAY_10_Tight shorts",
           "Top":"Top_L_CAS_WHITE_1_Off shoulder shirt",
           "Mouth":"Mouth_3",
@@ -71,10 +74,22 @@ const layerConfigurations = [
           "Hair":"Hair_HAIR1_BLONDE_NORMAL_EAR_Magma blonde",
         }
       }, */
+      /* {
+        id:1,
+        traits:{
+          "Body":"Body_MEAT_1_Cream#25",
+          "Legs":"Legs_L_BLACK_7_Socks black",
+          "Bottom":"Bottom_S_YELLOW_17_Suspicious serafuku skirt",
+          "Top":"Top_S2_YELLOW_26_Suspicious school coat#4",
+          "Mouth":"Mouth_8",
+          "Eyes":"Eyes_5_Green",
+          "Hair":"Hair_HAIR20_BLACK_COVERL_NOEAR_Awkward black",
+        }
+      }, */
     ],
 
     // These are needed if you intend to use 'disableSameColor', tagging traits with colors seems like a decent practice in general
-    colorTags:["WHITE","GRAY","BLACK",
+    colorTags:["WHITE","GRAY","BLACK","BROWN",
       "RED","ORANGE","YELLOW","BLONDE",
       "LIME","OLIVE","GREEN", 
       "TURQ","TEAL","CYAN","BLUE","DENIM",
@@ -201,6 +216,19 @@ const layerConfigurations = [
       },
       
 
+      // EYES -> FACIAL FEATURE & HAIR
+      // HC eyes block eye covering facial features
+      {
+        layer: "Eyes", tags: [["HC"]],
+        forceTags: [{
+          layer:"Facial feature",
+          tags:[["-Eye bandage"],["-Eyepatch"]],
+        },
+        {
+          layer:"Hair",
+          tags:[["-COVERL"]],
+        }]
+      },
 
 
 
@@ -239,7 +267,7 @@ const layerConfigurations = [
         blockLayers: ["Body overlay", "Facial feature"],
         forceTags: [{
           layer:"Eyes",
-          tags:[["-Cyber green"],["-Cyber red"]]
+          tags:[["-CYB"]]
         },
         {
           layer:"Neck accessory",
@@ -258,7 +286,7 @@ const layerConfigurations = [
       // DISABLE THIGHS WITH COLORED LEGS
       // Thigh accessories (THIGH slot) should only appear on GRAY and BLACKT legs, the solution is either disable on every other color... or mark all the thigh accessories with #0
       {
-        layer: "Legs", tags: [["PINK","WHITE","BLACK","RED","GREEN"]],
+        layer: "Legs", tags: [["PINK","WHITE","BLACK","GREEN"/* ,"BLUE","RED" */]],
         blockLayers: ["Thighs"],
       },
       // If bottoms are too high and block belly, block belly trait
@@ -271,7 +299,17 @@ const layerConfigurations = [
         layer: "Top", tags: [["-TUM"]],
         blockLayers: ["Belly"],
       },
-
+      // disable neck on specific outfits
+      {
+        layer: "Top", tags: [["DENK"]],
+        blockLayers: ["Neck accessory"],
+      },
+      
+      // If hand accessory, block back
+      {
+        layer: "Hand accessory", tags: [["-none"]],
+        blockLayers: ["Back"],
+      },
 
 
 
@@ -442,6 +480,41 @@ const layerConfigurations = [
           tags:[["BLACKT"],["H","T"]]
         }]
       },
+
+      
+      ////
+      // POLICE TOPS [COP]
+      ////
+      // Police top, only goes with police bottoms (there are 2)
+      {
+        layer: "Top", tags: [["COP"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["COP"]]
+        }],
+      },
+
+      
+      
+      ////
+      // MEDICAL TOPS [MED]
+      ////
+      // Medical tops, 1 is long and 1 goes with pretty much anything
+      {
+        layer: "Top", tags: [["MED"]],
+        forceTags: [{
+          layer:"Bottom",
+          tags:[["H","CYB","O","S"]]
+        }]
+      },
+      {
+        layer: "Top", tags: [["MED"],["LONG"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["BLACKT","WHITE","RED"],["L","H","T"]]
+        }]
+      },
+
 
       ////
       // MODERN SCHOOL TOPS [S2]
@@ -676,6 +749,14 @@ const layerConfigurations = [
           tags:[["WHITE","PINK","GRAYPINK","GRAY","BLACKT","GREEN","RED"]]
         }],
       },
+      // Specific rules for a few tops that could look good with cyb bottoms too
+      {
+        layer: "Top", traits: ["Top_H_CAS_OLIVE_30_Short shirt olive","Top_H_CAS_OLIVE_30_Short shirt camo"],
+        forceTraits: [{
+          layer:"Bottom",
+          traits:["Bottom_H_CYB_GRAY_21_Belted shorts","Bottom_H_CYB_GRAY_PANT_22_Belted pants","Bottom_H_CYB_GRAY_PANT_24_Tight belted pants"]
+        }],
+      },
       // Specific bottoms for a few tops that have a unique shade of pink and look bad with gray things
       {
         layer: "Top", traits: ["Top_L_CAS_PINK_13_Rainbow sweater#6"],
@@ -690,14 +771,14 @@ const layerConfigurations = [
       },
       // Specific rules for sundresses
       {
-        layer: "Top", traits: ["Top_CAS_PINK_LONG_9_Pink sundress#5","Top_CAS_YELLOW_LONG_9_Sundress#5"],
+        layer: "Top", traits: ["Top_CAS_PINK_LONG_9_Pink sundress","Top_CAS_YELLOW_LONG_9_Sundress"],
         forceTags: [{
           layer:"Legs",
           tags:[["WHITE","BLACKT","PINK"]]
         }],
       },
       {
-        layer: "Top", traits: ["Top_CAS_BLACK_LONG_9_Black sundress#5"],
+        layer: "Top", traits: ["Top_CAS_BLACK_LONG_9_Black sundress"],
         forceTags: [{
           layer:"Legs",
           tags:[["BLACK","BLACKT"]]
@@ -755,6 +836,20 @@ const layerConfigurations = [
           layer:"Legs",
           tags:[["BLACKT"],["H","T"]]
         }]
+      },
+
+      
+      
+      ////
+      // POLICE BOTTOMS [COP]
+      ////
+      // Police bottoms go with a few select colors
+      {
+        layer: "Bottom", tags: [["COP"]],
+        forceTags: [{
+          layer:"Legs",
+          tags:[["L","H","T"],["GRAY","BLACK","BLUE","BLACKT","RED"]] // gray/black/blue/blackt/red
+        }],
       },
 
       ////
@@ -971,6 +1066,7 @@ module.exports = {
   uniqueDnaTorrance,
   passiveTraits,
   rngSeed,
+  dnaIsDumb,
   traitOutline,
   layerConfigurations,
   averageTraitWeight,

@@ -586,7 +586,7 @@ const genBackground4 = (ctx, scheme) => {
 	
 }
 
-const genBackground5 = (ctx, scheme) => {
+const genBackground5 = (ctx, scheme, glitchy) => {
 	let baseUnit = format.width/16;
 	let diffNegStart = baseUnit*4;
 	let topDiff = (baseUnit-(format.height%baseUnit));
@@ -600,10 +600,19 @@ const genBackground5 = (ctx, scheme) => {
 		for(let i=start.x + (jc%2==0?w:0);i<end.x; i+=w*2) {
 			let x = i;
 
+			if(glitchy && getRandom()>0.65) {
+				continue;
+			}
+
 			{
 				let v2arr = [];
 
 				let divw = w/6;
+
+				if(glitchy && getRandom()>0.65) {
+					divw*=2;
+				}
+
 				v2arr.push({x:x+w/2, y:y    +divw});
 				v2arr.push({x:x+w, y:y+w/2    +divw});
 				v2arr.push({x:x+w/2, y:y+w    +divw});
@@ -680,9 +689,10 @@ const genBackground6 = (ctx, scheme) => {
 }
 
 const genBackground7 = (ctx, scheme) => {
-	let newScheme;
+	
 
 	let reversedScheme = [scheme[1], scheme[0], scheme[2]];
+	let newScheme;
 
 	if(getRandom() > 0.5 ) {
 		newScheme = scheme;
@@ -697,16 +707,16 @@ const genBackground7 = (ctx, scheme) => {
 	if(randomNum > 0.8) {
 		genBackground1(ctx,newScheme); // This is really cool
 		genBackground2(ctx,newScheme);
-		genBackground3(ctx,newScheme);
-		genBackground4(ctx,newScheme);
+		genBackground3(ctx,reversedScheme);
+		genBackground4(ctx,reversedScheme);
 		//genBackground5(ctx,newScheme);
 	}
 	else if(randomNum > 0.6) {
 		genBackground1(ctx,newScheme); // This is really cool
 		genBackground2(ctx,newScheme);
-		genBackground3(ctx,newScheme);
+		genBackground3(ctx,reversedScheme);
 		//genBackground4(ctx,newScheme);
-		genBackground5(ctx,newScheme);
+		genBackground5(ctx,reversedScheme,true);
 	}
 	else if(randomNum > 0.4) {
 		/* genBackground1(ctx,newScheme); // This is really cool
@@ -729,12 +739,12 @@ const genBackground7 = (ctx, scheme) => {
 	else if(randomNum > 0.2) {
 		
 		genBackground6(ctx,newScheme);
-		genBackground4(ctx,newScheme);
-		genBackground5(ctx,newScheme);
+		genBackground4(ctx,reversedScheme);
+		genBackground5(ctx,reversedScheme,true);
 	}
 	else {
 		genBackground3(ctx,newScheme);
-		genBackground4(ctx,newScheme);
+		genBackground4(ctx,reversedScheme);
 	}
 }
 
@@ -765,12 +775,12 @@ const generateCustomBackground = (layerConfiguration, layerElements, ctx, editio
 		genBackground7
 	];
 
-	bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);
+	//bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);
 	// 4 is fucked, needs a lot less randomness
 	// 6 is not that good
 	//genBackground4(ctx,scheme);
 	//genBackground5(ctx,scheme);
-	//genBackground7(ctx,scheme);
+	genBackground7(ctx,scheme);
 
 	/* genBackground1(ctx,scheme); // This is really cool
 	genBackground2(ctx,scheme);
