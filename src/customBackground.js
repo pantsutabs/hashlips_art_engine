@@ -350,12 +350,14 @@ const generateColorMatchingData = (layerElements) => {
 	return {darkness, taggedColors};
 };
 
-const genBackground1 = (ctx, scheme) => {
+const genBackground1 = (ctx, scheme, glitch) => {
 	let baseUnit = format.width/16;
 	let diffNegStart = baseUnit*4;
 	let topDiff = (baseUnit-(format.height%baseUnit));
 	let start = {x: 0 -(diffNegStart), y: -(topDiff/2) -(diffNegStart)};
 	let end = {x:start.x + baseUnit*(16) +(diffNegStart*2), y:start.y+ Math.ceil(format.height/baseUnit)*baseUnit +(diffNegStart*2)};
+	glitch = glitch || 0;
+	glitch = glitch/2;
 
 	let incrementByStart = baseUnit*(6 + Math.floor(getRandom()*4));
 	let incrementBy = incrementByStart;
@@ -367,8 +369,8 @@ const genBackground1 = (ctx, scheme) => {
 		let v2arr = [];
 
 		v2arr.push({x: x,   y: y});
-		v2arr.push({x: end.x,   y: y + baseUnit*4});
-		v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5});
+		if(getRandom() > glitch)  v2arr.push({x: end.x,   y: y + baseUnit*4});
+		if(getRandom() > glitch)  v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5});
 		v2arr.push({x: x,   y: y + incrementBy*0.5});
 
 		drawShape(ctx, v2arr, scheme[1]);
@@ -377,20 +379,22 @@ const genBackground1 = (ctx, scheme) => {
 		let thirdShapeSize = incrementBy/6;
 		
 		v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
-		v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5 - thirdShapeSize/2});
-		v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5 + thirdShapeSize/2});
+		if(getRandom() > glitch)  v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5 - thirdShapeSize/2});
+		if(getRandom() > glitch)  v2arr.push({x: end.x,   y: y + baseUnit*4 + incrementBy*0.5 + thirdShapeSize/2});
 		v2arr.push({x: x,   y: y + incrementBy*0.5 + thirdShapeSize/2});
 
 		drawShape(ctx, v2arr, scheme[2]);
 	}
 }
 
-const genBackground2 = (ctx, scheme) => {
+const genBackground2 = (ctx, scheme, glitch) => {
 	let baseUnit = format.width/16;
 	let diffNegStart = baseUnit*4;
 	let topDiff = (baseUnit-(format.height%baseUnit));
 	let start = {x: 0 -(diffNegStart), y: -(topDiff/2) -(diffNegStart)};
 	let end = {x:start.x + baseUnit*(16) +(diffNegStart*2), y:start.y+ Math.ceil(format.height/baseUnit)*baseUnit +(diffNegStart*2)};
+	glitch = glitch || 0;
+	glitch = glitch/2;
 
 	let incrementByStart = baseUnit*(6 + Math.floor(getRandom()*5));
 	let incrementBy = incrementByStart;
@@ -406,14 +410,18 @@ const genBackground2 = (ctx, scheme) => {
 		let iend = 0;
 		let angleHeight = (w/4);
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
+			if(getRandom() < glitch)  v2arr.push({x:x + w*i + w*0.25, y:y + angleHeight});
 			v2arr.push({x:x + w*i + w/2, y:y + angleHeight});
+			if(getRandom() < glitch)  v2arr.push({x:x + w*i + w*0.75, y:y});
 			v2arr.push({x:x + w*i + w, y:y});
 			iend = i+1;
 		}
 		
 		v2arr.push({x:x + w*iend, y:y + incrementBy*0.5});
 		for(let i=iend; (start.x+i*w)>start.x+1; i--) {
+			if(getRandom() < glitch)  v2arr.push({x:x + w*i - w*0.25, y:y + angleHeight  + incrementBy*0.5});
 			v2arr.push({x:x + w*i - w/2, y:y + angleHeight  + incrementBy*0.5});
+			if(getRandom() < glitch)  v2arr.push({x:x + w*i - w*0.75, y:y  + incrementBy*0.5});
 			v2arr.push({x:x + w*i - w, y:y  + incrementBy*0.5});
 		}
 
@@ -425,28 +433,69 @@ const genBackground2 = (ctx, scheme) => {
 		
 		v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
+			//if(getRandom() < glitch)  
 			v2arr.push({x:x + w*i + w/2, y:y + angleHeight  + incrementBy*0.5 - thirdShapeSize/2});
+			//if(getRandom() < glitch)  
 			v2arr.push({x:x + w*i + w, y:y  + incrementBy*0.5 - thirdShapeSize/2});
 			iend = i+1;
 		}
 		
 		v2arr.push({x:x + w*iend, y:y + incrementBy*0.5 + thirdShapeSize/2});
 		for(let i=iend; (start.x+i*w)>start.x+1; i--) {
+			//if(getRandom() < glitch)  
 			v2arr.push({x:x + w*i - w/2, y:y + angleHeight + incrementBy*0.5 + thirdShapeSize/2});
+			//if(getRandom() < glitch)  
 			v2arr.push({x:x + w*i - w, y:y  + incrementBy*0.5 + thirdShapeSize/2});
 		}
 
 		drawShape(ctx, v2arr, scheme[2]);
+
+		
 	}
+
+	/* incrementByStart = baseUnit*(9 + Math.floor(getRandom()*2));
+	for(let j=start.y;j<end.y; j+=incrementBy) {
+		let y = j + baseUnit/2;
+		let x = start.x;
+		incrementBy = Math.max(incrementBy*0.85, incrementByStart*0.25);
+
+		let v2arr = [];
+
+		v2arr.push({x: x,   y: y});
+		let iend = 0;
+		let angleHeight = (w/4);
+
+		if(glitch >0 && (getRandom() < glitch*2)) {
+			// Third color
+			v2arr = [];
+			let thirdShapeSize = getRandom() > 0.5 ? incrementBy/3 : incrementBy/2;
+			
+			v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
+			for(let i=0; (start.x+i*w)<end.x-1; i++) {
+				v2arr.push({x:x + w*i + w/2, y:y + angleHeight  + incrementBy*0.5 - thirdShapeSize/2});
+				v2arr.push({x:x + w*i + w, y:y  + incrementBy*0.5 - thirdShapeSize/2});
+				iend = i+1;
+			}
+			
+			v2arr.push({x:x + w*iend, y:y + incrementBy*0.5 + thirdShapeSize/2});
+			for(let i=iend; (start.x+i*w)>start.x+1; i--) {
+				v2arr.push({x:x + w*i - w/2, y:y + angleHeight + incrementBy*0.5 + thirdShapeSize/2});
+				v2arr.push({x:x + w*i - w, y:y  + incrementBy*0.5 + thirdShapeSize/2});
+			}
+
+			drawShape(ctx, v2arr, scheme[0]);
+		}
+	} */
 }
 
-const genBackground3 = (ctx, scheme) => {
-
+const genBackground3 = (ctx, scheme, glitch) => {
 	let baseUnit = format.width/16;
 	let diffNegStart = baseUnit*4;
 	let topDiff = (baseUnit-(format.height%baseUnit));
 	let start = {x: 0 -(diffNegStart), y: -(topDiff/2) -(diffNegStart)};
 	let end = {x:start.x + baseUnit*(16) +(diffNegStart*2), y:start.y+ Math.ceil(format.height/baseUnit)*baseUnit +(diffNegStart*2)};
+	glitch = glitch || 0;
+	glitch = glitch/2;
 
 	let incrementByStart = baseUnit*(8 + Math.floor(getRandom()*3));
 	let incrementBy = incrementByStart;
@@ -462,14 +511,14 @@ const genBackground3 = (ctx, scheme) => {
 		let iend = 0;
 		let angleHeight = (w/4);
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
-			v2arr.push({x:x + w*i + w/2, y:y + angleHeight});
+			if(getRandom() > glitch)  v2arr.push({x:x + w*i + w/2, y:y + angleHeight});
 			v2arr.push({x:x + w*i + w, y:y});
 			iend = i+1;
 		}
 		
 		v2arr.push({x:x + w*iend, y:y + incrementBy*0.5});
 		for(let i=iend; (start.x+i*w)>start.x+1; i--) {
-			v2arr.push({x:x + w*i - w/2, y:y + angleHeight  + incrementBy*0.5});
+			if(getRandom() > glitch)  v2arr.push({x:x + w*i - w/2, y:y + angleHeight  + incrementBy*0.5});
 			v2arr.push({x:x + w*i - w, y:y  + incrementBy*0.5});
 		}
 
@@ -481,14 +530,14 @@ const genBackground3 = (ctx, scheme) => {
 		
 		v2arr.push({x: x,   y: y + incrementBy*0.5 - thirdShapeSize/2});
 		for(let i=0; (start.x+i*w)<end.x-1; i++) {
-			v2arr.push({x:x + w*i + w/2, y:y + angleHeight  + incrementBy*0.5 - thirdShapeSize/2});
+			if(getRandom() > glitch)  v2arr.push({x:x + w*i + w/2, y:y + angleHeight  + incrementBy*0.5 - thirdShapeSize/2});
 			v2arr.push({x:x + w*i + w, y:y  + incrementBy*0.5 - thirdShapeSize/2});
 			iend = i+1;
 		}
 		
 		v2arr.push({x:x + w*iend, y:y + incrementBy*0.5 + thirdShapeSize/2});
 		for(let i=iend; (start.x+i*w)>start.x+1; i--) {
-			v2arr.push({x:x + w*i - w/2, y:y + angleHeight + incrementBy*0.5 + thirdShapeSize/2});
+			if(getRandom() > glitch)  v2arr.push({x:x + w*i - w/2, y:y + angleHeight + incrementBy*0.5 + thirdShapeSize/2});
 			v2arr.push({x:x + w*i - w, y:y  + incrementBy*0.5 + thirdShapeSize/2});
 		}
 
@@ -586,12 +635,14 @@ const genBackground4 = (ctx, scheme) => {
 	
 }
 
-const genBackground5 = (ctx, scheme, glitchy) => {
+const genBackground5 = (ctx, scheme, glitch) => {
 	let baseUnit = format.width/16;
 	let diffNegStart = baseUnit*4;
 	let topDiff = (baseUnit-(format.height%baseUnit));
 	let start = {x: 0 -(diffNegStart), y: -(topDiff/2) -(diffNegStart)};
 	let end = {x:start.x + baseUnit*(16) +(diffNegStart*2), y:start.y+ Math.ceil(format.height/baseUnit)*baseUnit +(diffNegStart*2)};
+	glitch = glitch || 0;
+	glitch = glitch/2;
 
 	let w = baseUnit*3
 
@@ -600,7 +651,7 @@ const genBackground5 = (ctx, scheme, glitchy) => {
 		for(let i=start.x + (jc%2==0?w:0);i<end.x; i+=w*2) {
 			let x = i;
 
-			if(glitchy && getRandom()>0.65) {
+			if(getRandom() < glitch/2) {
 				continue;
 			}
 
@@ -609,12 +660,12 @@ const genBackground5 = (ctx, scheme, glitchy) => {
 
 				let divw = w/6;
 
-				if(glitchy && getRandom()>0.65) {
+				if(getRandom() < glitch) {
 					divw*=2;
 				}
 
 				v2arr.push({x:x+w/2, y:y    +divw});
-				v2arr.push({x:x+w, y:y+w/2    +divw});
+				if(getRandom() > glitch)  v2arr.push({x:x+w, y:y+w/2    +divw});
 				v2arr.push({x:x+w/2, y:y+w    +divw});
 				v2arr.push({x:x, y:y+w/2    +divw});
 
@@ -628,7 +679,7 @@ const genBackground5 = (ctx, scheme, glitchy) => {
 
 				v2arr.push({x:x+w/2, y:y});
 				v2arr.push({x:x+w, y:y+w/2});
-				v2arr.push({x:x+w/2, y:y+w});
+				if(getRandom() > glitch)  v2arr.push({x:x+w/2, y:y+w});
 				v2arr.push({x:x, y:y+w/2});
 
 				let color = scheme[1];
@@ -688,7 +739,7 @@ const genBackground6 = (ctx, scheme) => {
 	}
 }
 
-const genBackground7 = (ctx, scheme) => {
+const genBackground7 = (ctx, scheme, glitch) => {
 	
 
 	let reversedScheme = [scheme[1], scheme[0], scheme[2]];
@@ -705,46 +756,46 @@ const genBackground7 = (ctx, scheme) => {
 
 	let randomNum = getRandom();
 	if(randomNum > 0.8) {
-		genBackground1(ctx,newScheme); // This is really cool
-		genBackground2(ctx,newScheme);
-		genBackground3(ctx,reversedScheme);
-		genBackground4(ctx,reversedScheme);
+		genBackground1(ctx,newScheme, glitch); // This is really cool
+		genBackground2(ctx,newScheme, glitch);
+		genBackground3(ctx,reversedScheme, glitch);
+		genBackground4(ctx,reversedScheme, glitch);
 		//genBackground5(ctx,newScheme);
 	}
 	else if(randomNum > 0.6) {
-		genBackground1(ctx,newScheme); // This is really cool
-		genBackground2(ctx,newScheme);
-		genBackground3(ctx,reversedScheme);
+		genBackground1(ctx,newScheme, glitch); // This is really cool
+		genBackground2(ctx,newScheme, glitch);
+		genBackground3(ctx,reversedScheme, glitch);
 		//genBackground4(ctx,newScheme);
-		genBackground5(ctx,reversedScheme,true);
+		genBackground5(ctx,reversedScheme, (glitch +1)/2);
 	}
 	else if(randomNum > 0.4) {
 		/* genBackground1(ctx,newScheme); // This is really cool
 		//genBackground2(ctx,scheme);
 		//genBackground3(ctx,scheme);
 		genBackground4(ctx,newScheme); */
-		genBackground6(ctx,reversedScheme);
-		genBackground1(ctx,reversedScheme);
-		genBackground1(ctx,reversedScheme);
-		genBackground1(ctx,reversedScheme);
-		genBackground2(ctx,scheme);
-		genBackground2(ctx,scheme);
-		genBackground2(ctx,reversedScheme);
-		genBackground3(ctx,scheme);
-		genBackground3(ctx,scheme);
-		genBackground3(ctx,reversedScheme);
+		genBackground6(ctx,reversedScheme, glitch);
+		genBackground1(ctx,reversedScheme, glitch);
+		genBackground1(ctx,reversedScheme, glitch);
+		genBackground1(ctx,reversedScheme, glitch);
+		genBackground2(ctx,scheme, glitch);
+		genBackground2(ctx,scheme, glitch);
+		genBackground2(ctx,reversedScheme, glitch);
+		genBackground3(ctx,scheme, glitch);
+		genBackground3(ctx,scheme, glitch);
+		genBackground3(ctx,reversedScheme, glitch);
 		//genBackground4(ctx,newScheme);
 		//genBackground3(ctx,newScheme);
 	}
 	else if(randomNum > 0.2) {
 		
-		genBackground6(ctx,newScheme);
-		genBackground4(ctx,reversedScheme);
-		genBackground5(ctx,reversedScheme,true);
+		genBackground6(ctx,newScheme, glitch);
+		genBackground4(ctx,reversedScheme, glitch);
+		genBackground5(ctx,reversedScheme,  (glitch +1)/2);
 	}
 	else {
-		genBackground3(ctx,newScheme);
-		genBackground4(ctx,reversedScheme);
+		genBackground3(ctx,newScheme, glitch);
+		genBackground4(ctx,reversedScheme, glitch);
 	}
 }
 
@@ -752,6 +803,7 @@ const generateCustomBackground = (layerConfiguration, layerElements, ctx, editio
 	getRandom = rngSeed ? help.newPrngStream(rngSeed + editionNum).random : Math.random;
 	let {darkness, taggedColors} = generateColorMatchingData(layerElements);
 	let scheme = generateColorScheme3(taggedColors,darkness);
+	let glitchiness = getRandom() > 0.15 ? 0 : getRandom(); // 0.25
 	
     ctx.fillStyle = scheme[0];
 	ctx.fillRect(0, 0, format.width, format.height);
@@ -767,20 +819,25 @@ const generateCustomBackground = (layerConfiguration, layerElements, ctx, editio
 
 	let bgs = [
 		genBackground1, // linear lines // BAD
+		genBackground1, // linear lines // BAD
+		genBackground2, // arrow down // BAD
 		genBackground2, // arrow down // BAD
 		genBackground3, // zigzag // BAD
+		genBackground3, // zigzag // BAD
 		//genBackground4, // floating squares // Need reimagining
+		genBackground5, // shaded squares // Great, could use more shapes
 		genBackground5, // shaded squares // Great, could use more shapes
 		//genBackground6, // big diamond // Need reimagining
 		genBackground7
 	];
 
-	//bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme);
+	bgs[Math.floor(getRandom()*bgs.length)](ctx, scheme, glitchiness);
 	// 4 is fucked, needs a lot less randomness
 	// 6 is not that good
 	//genBackground4(ctx,scheme);
 	//genBackground5(ctx,scheme);
-	genBackground7(ctx,scheme);
+	//genBackground7(ctx,scheme, glitchiness);
+	//genBackground5(ctx,scheme, glitchiness);
 
 	/* genBackground1(ctx,scheme); // This is really cool
 	genBackground2(ctx,scheme);

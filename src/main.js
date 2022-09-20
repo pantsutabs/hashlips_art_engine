@@ -20,6 +20,7 @@ const {
 	debugLogs,
 	rngSeed,
 	dnaIsDumb,
+	disableExtraMetadataProps,
 	traitOutline,
 	extraMetadata,
 	text,
@@ -156,7 +157,7 @@ const drawBackground = () => {
 const addMetadata = (_dna, _edition) => {
 	let dateTime = Date.now();
 	let tempMetadata = {
-		name: `${namePrefix} #${_edition}`,
+		name: `${namePrefix} ${_edition}`,
 		description: description,
 		image: `${baseUri}/${_edition}.png`,
 		dna: sha1(_dna),
@@ -639,6 +640,13 @@ const saveMetaDataSingleFile = (_editionCount) => {
 			`Writing metadata for ${_editionCount}: ${JSON.stringify(metadata)}`
 		)
 		: null;
+	if(disableExtraMetadataProps) {
+		metadata = Object.assign({},metadata);
+		delete metadata.dna;
+		delete metadata.date;
+		delete metadata.edition;
+		delete metadata.compiler;
+	}
 	fs.writeFileSync(
 		`${buildDir}/json/${_editionCount}.json`,
 		JSON.stringify(metadata, null, 2)

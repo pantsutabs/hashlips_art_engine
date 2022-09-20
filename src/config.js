@@ -5,8 +5,8 @@ const { NETWORK } = require(`${basePath}/constants/network.js`);
 const network = NETWORK.eth;
 
 // General metadata for Ethereum
-const namePrefix = "Your Collection";
-const description = "Remember to replace this description";
+const namePrefix = "Scuffie";
+const description = "Scuffed Femboys are a smol collection of 1,344 scuffed little cuties";
 const baseUri = "ipfs://NewUriToReplace";
 
 const solanaMetadata = {
@@ -21,10 +21,12 @@ const solanaMetadata = {
   ],
 };
 
-const rngSeed = null;//"TESTING ROLLS: FBD Scuffed Femboys #:"; // null to disable, this makes it so every NFT is predetermined
+const rngSeed = null;//"XXX#:"; // null to disable, this makes it so every NFT is predetermined
 
 // This makes it so hashlips' minimum rarity check doesn't cause exceptions
 const dnaIsDumb = true;
+
+const disableExtraMetadataProps = true;
 
 const traitOutline = false;
 
@@ -207,11 +209,12 @@ const layerConfigurations = [
 
       // HAIR -> FACIAL FEATURE
       // Partially face covering hairs on LEFT shouldn't have LEFT facial features, specifically it's 1 bandage
+      // ALSO shouldn't have the Eyepatch, it looks weird since there's only 1 strap, sometimes looks like an eyebrow
       {
         layer: "Hair", tags: [["COVERL"]],
         forceTags: [{
           layer:"Facial feature",
-          tags:[["M","R"]],
+          tags:[["M","R"],["-Eyepatch"]],
         }]
       },
       
@@ -1067,6 +1070,7 @@ module.exports = {
   passiveTraits,
   rngSeed,
   dnaIsDumb,
+  disableExtraMetadataProps,
   traitOutline,
   layerConfigurations,
   averageTraitWeight,
